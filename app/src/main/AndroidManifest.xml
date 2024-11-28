@@ -13,7 +13,27 @@
         android:theme="@style/Theme.Compose"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.theme.forgotpassword.ForgotPasswordActivity"
+            android:exported="false"
+            android:label="@string/title_activity_forgot_password"
+            android:theme="@style/Theme.Compose" />
+        <activity
+            android:name=".ui.theme.register.RegisterActivity"
+            android:exported="false"
+            android:label="@string/title_activity_register"
+            android:theme="@style/Theme.Compose" />
+        <activity
+            android:name=".ui.theme.home.HomeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_home"
+            android:theme="@style/Theme.Compose" />
+        <activity
+            android:name=".ui.theme.login.LoginActivity"
+            android:exported="false"
+            android:label="@string/title_activity_login"
+            android:theme="@style/Theme.Compose" />
+        <activity
+            android:name=".ui.theme.splash.SplashActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Compose">
@@ -23,6 +43,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Compose" />
     </application>
 
 </manifest>
