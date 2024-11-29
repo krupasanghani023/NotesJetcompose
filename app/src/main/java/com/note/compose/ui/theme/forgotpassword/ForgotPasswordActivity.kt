@@ -6,12 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -169,11 +173,13 @@ fun ForgotPasswordScreen(
 
             // Title
             Text(
-                text = "Forgot password",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
+                text = stringResource(id = R.string.forgot_password),
+                fontSize = 17.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 15.dp),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 24.dp)
+                fontWeight = FontWeight.ExtraBold
             )
 
             // Email Input Field
@@ -187,34 +193,36 @@ fun ForgotPasswordScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = null
-                    )
-                }
             )
 
             // Submit Button
-            Button(
-                onClick = {  },
+
+            OutlinedButton(
+                onClick = { },
+                shape = RoundedCornerShape(50),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                shape = RoundedCornerShape(12.dp)
+                    .padding(top = 25.dp),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = colorResource(id = R.color.white),
+                    containerColor = colorResource(id = R.color.color_5E35B1)
+                )
             ) {
-                Text(text = "Submit", fontSize = 18.sp)
+                Text(
+                    text = stringResource(id = R.string.submit),
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
-
             // Back to Login Button
             TextButton(
                 onClick = {  },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(
-                    text = "Back to login",
+                    text = stringResource(id = R.string.back_to_login),
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = colorResource(id = R.color.color_5E35B1)
                 )
             }
         }

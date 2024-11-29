@@ -210,14 +210,7 @@ fun NameTextFiled(
 
 @Composable
 fun allTextFiled( text: String = "") {
-    val rainbowColors: List<Color> = listOf(colorResource(id = R.color.color_D81B60), colorResource(
-        id = R.color.color_5E35B1
-    ), colorResource(id = R.color.color_00ACC1))
-    val brush = remember {
-        Brush.linearGradient(
-            colors = rainbowColors
-        )
-    }
+
     Column {
         Text(
             text = text,

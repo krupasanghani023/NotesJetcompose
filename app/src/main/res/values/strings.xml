@@ -20,4 +20,12 @@
     <string name="enter_name">Enter Name</string>
     <string name="enter_user_name">Enter User Name</string>
     <string name="title_activity_forgot_password">ForgotPasswordActivity</string>
+    <string name="back_to_login">Back to login</string>
+    <string name="enter_title">enter title</string>
+    <string name="enter_tag">enter tag</string>
+    <string name="enter_description">enter description</string>
+    <string name="title">Title</string>
+    <string name="tag">Tag</string>
+    <string name="description">Description</string>
+    <string name="save">Save</string>
 </resources>
