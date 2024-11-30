@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.note.compose.MainActivity
 import com.note.compose.R
 import com.note.compose.ui.theme.forgotpassword.ForgotPasswordActivity
 import com.note.compose.ui.theme.home.HomeActivity
