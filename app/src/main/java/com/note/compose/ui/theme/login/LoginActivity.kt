@@ -2,6 +2,7 @@ package com.note.compose.ui.theme.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -63,6 +65,7 @@ import com.note.compose.ui.theme.forgotpassword.ForgotPasswordActivity
 import com.note.compose.ui.theme.home.HomeActivity
 import com.note.compose.ui.theme.login.ui.theme.ComposeTheme
 import com.note.compose.ui.theme.register.RegisterActivity
+import com.note.compose.ui.theme.register.model.UsesSharedPreferencesUtil.isUserValid
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +101,7 @@ fun LoginUi(
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit) {
-
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -174,7 +177,20 @@ fun LoginUi(
                     passwordString = it
                 }
                 OutlinedButton(
-                    onClick = { onLoginClick()},
+                    onClick = {
+                        val email = emailString
+                        val password = passwordString
+
+                        // Check if the user is valid
+                        if (isUserValid(context, email, password)) {
+                            // Proceed to the next screen
+                            onLoginClick()
+                        } else {
+                            // Show error message
+                            Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                        }
+//                        onLoginClick()
+                              },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier
                         .fillMaxWidth()

@@ -1,7 +1,10 @@
 package com.note.compose.ui.theme.register
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract.CommonDataKinds.Email
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -58,11 +62,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import com.note.compose.R
 import com.note.compose.ui.theme.home.HomeActivity
 import com.note.compose.ui.theme.login.EmailTextFiled
 import com.note.compose.ui.theme.login.LoginActivity
 import com.note.compose.ui.theme.login.PassWordTextFiled
+import com.note.compose.ui.theme.register.model.User
+import com.note.compose.ui.theme.register.model.UsesSharedPreferencesUtil
 import com.note.compose.ui.theme.register.ui.theme.ComposeTheme
 
 class RegisterActivity : ComponentActivity() {
@@ -83,6 +90,8 @@ class RegisterActivity : ComponentActivity() {
 
 @Composable
 fun RegisterUI( onRegisterClick: () -> Unit) {
+    val context = LocalContext.current
+
     Box(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 15.dp, vertical = 40.dp)
@@ -141,22 +150,55 @@ fun RegisterUI( onRegisterClick: () -> Unit) {
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        var nameString by remember { mutableStateOf("") }
                         var emailString by remember { mutableStateOf("") }
                         var passwordString by remember { mutableStateOf("") }
+                        var isEmailValid by remember { mutableStateOf(true) }
+                        var isPasswordValid by remember { mutableStateOf(true) }
+
+                        // Email validation regex
+                        val emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$".toRegex()
+
+                        // Email Validation Check
+                        val emailValidation = {
+                            isEmailValid = emailRegex.matches(emailString)
+                        }
+
+                        // Password Validation Check
+                        val passwordValidation = {
+                            isPasswordValid = passwordString.length >= 6
+                        }
                         allTextFiled("Name")
-                        NameTextFiled(hint = stringResource(id = R.string.enter_name), text = emailString) {
-                            emailString = it
+                        NameTextFiled(hint = stringResource(id = R.string.enter_name), text = nameString) {
+                            nameString = it
                         }
                         allTextFiled("Email")
-                        UserTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString) {
+                        EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString,isEmailValid=isEmailValid) {
                             emailString = it
                         }
                         allTextFiled("Password")
-                        PassTextFiled(hint = stringResource(id = R.string.enter_password), text = passwordString) {
+                        PassTextFiled(hint = stringResource(id = R.string.enter_password), text = passwordString,isPasswordValid=isPasswordValid) {
                             passwordString = it
                         }
                         OutlinedButton(
-                            onClick = { },
+                            onClick = {
+                                emailValidation()
+                                passwordValidation()
+                                // Save user data after registration
+
+                                if (isEmailValid && isPasswordValid) {
+                                    // Proceed with registration
+                                            val newUser = User(name = nameString, email = emailString, password = passwordString)
+                                            val usersList = UsesSharedPreferencesUtil.getUsersFromPreferences(context = context) + newUser  // Add new user to existing list
+                                            UsesSharedPreferencesUtil.saveUsersToPreferences(context, usersList)
+
+                                            // Navigate to HomeActivity or LoginActivity
+                                            val intent = Intent(context, LoginActivity::class.java)
+                                            context.startActivity(intent)
+                                        }
+
+
+                            },
                             shape = RoundedCornerShape(50),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -176,7 +218,6 @@ fun RegisterUI( onRegisterClick: () -> Unit) {
                 }
             }
         }
-
     }
 
 
@@ -224,9 +265,11 @@ fun allTextFiled( text: String = "") {
 }
 
 @Composable
-fun UserTextFiled(
-    hint: String, text: String = "", onValueChange: (String) -> Unit
+fun EmailTextFiled(
+    hint: String, text: String = "",isEmailValid:Boolean, onValueChange: (String) -> Unit
 ) {
+
+
     val rainbowColors: List<Color> = listOf(colorResource(id = R.color.color_D81B60), colorResource(
         id = R.color.color_5E35B1
     ), colorResource(id = R.color.color_00ACC1))
@@ -246,12 +289,16 @@ fun UserTextFiled(
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
         )
+        if (!isEmailValid) {
+            Text("Invalid email address", color = Color.Red, fontSize = 12.sp)
+        }
+
     }
 
 }
 @Composable
 fun PassTextFiled(
-    hint: String, text: String = "", onValueChange: (String) -> Unit
+    hint: String, text: String = "",isPasswordValid:Boolean ,onValueChange: (String) -> Unit
 ) {
     val rainbowColors: List<Color> = listOf(colorResource(id = R.color.color_D81B60), colorResource(
         id = R.color.color_5E35B1
@@ -288,6 +335,9 @@ fun PassTextFiled(
                 }
             }
         )
+        if (!isPasswordValid) {
+            Text("Password must be at least 6 characters", color = Color.Red, fontSize = 12.sp)
+        }
     }
 
 }
