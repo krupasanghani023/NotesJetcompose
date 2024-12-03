@@ -21,8 +21,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,15 +36,44 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.note.compose.R
+import com.note.compose.ui.theme.datamodel.Note
+import com.note.compose.ui.theme.datamodel.Tag
+import com.note.compose.ui.theme.home.DeleteConfirmationDialog
 import com.note.compose.ui.theme.home.MainScreen
 import com.note.compose.ui.theme.home.utils.SharedPreferencesUtil
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
 
 @Composable
-fun TagScreen(navController: NavController) {
-//    val tags = remember { mutableStateListOf("Tag 1", "Tag 2") }
+fun TagScreen(navController: NavController,
+              viewModel: FirebaseViewModel, userId: String) {
     val context = LocalContext.current
-    val tags = remember { mutableStateListOf(*SharedPreferencesUtil.loadTags(context).toTypedArray()) }
-    if (tags.isEmpty()) {
+    val selectedNoteId = remember { mutableStateOf<String?>(null) }
+    val showDialog = remember { mutableStateOf(false) }
+    var tagList by remember { mutableStateOf(listOf<Tag>()) }
+    LaunchedEffect(userId) {
+        viewModel.getUserTags(userId) { notes ->
+            tagList = notes
+        }
+    }
+    if (showDialog.value) {
+        selectedNoteId.value?.let { tagId ->
+            DeleteConfirmationDialog(
+                tagId = tagId,
+                noteId = "",
+                userId = userId,
+                onDismiss = { showDialog.value = false },
+                onConfirmDelete = {
+                    // After deletion, dismiss the dialog and refresh the notes list
+                    showDialog.value = false
+                    viewModel.getUserTags(userId) { tags ->
+                        tagList = tags
+                    } // Optionally refresh the list
+                },
+                viewModel
+            )
+        }
+    }
+    if (tagList.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize()  // Take the full screen size
         ) {
@@ -58,7 +91,7 @@ fun TagScreen(navController: NavController) {
         ) {
             Text(text = "Tags", style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(8.dp))
-            tags.forEachIndexed { index, tag ->
+            tagList.forEach { tag ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -71,7 +104,7 @@ fun TagScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = tag.title,
+                            text = tag.tagName,
                             modifier = Modifier
                                 .weight(1f)
                                 .align(Alignment.CenterVertically)
@@ -81,14 +114,14 @@ fun TagScreen(navController: NavController) {
                             horizontalArrangement = Arrangement.End
                         ) {
                             IconButton(onClick = {
-                                navController.navigate("add_tag_screen/${tag.title}")
+                                navController.navigate("add_tag_screen/${tag.id}/${tag.tagName}")
                                 Log.d("NoteScreen", "Navigating with tag: $${tag}")
                             }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit")
                             }
                             IconButton(onClick = {
-                                tags.removeAt(index)
-                                SharedPreferencesUtil.saveTags(context, tags)
+                                selectedNoteId.value = tag.id
+                                showDialog.value = true
                             }) {
                                 Icon(
                                     Icons.Default.Delete,
@@ -109,5 +142,5 @@ fun TagScreen(navController: NavController) {
 fun PreviewTagScreen() {
     val navController = rememberNavController()
 
-    TagScreen(navController)
+    TagScreen(navController, FirebaseViewModel(),"")
 }

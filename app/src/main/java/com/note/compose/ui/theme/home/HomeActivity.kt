@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -41,14 +40,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.note.compose.R
+import com.note.compose.ui.theme.datamodel.Note
+import com.note.compose.ui.theme.datamodel.Tag
 import com.note.compose.ui.theme.home.note.AddNoteScreen
 import com.note.compose.ui.theme.home.note.NoteScreen
 import com.note.compose.ui.theme.home.tag.AddTagScreen
 import com.note.compose.ui.theme.home.tag.TagScreen
 import com.note.compose.ui.theme.home.ui.theme.ComposeTheme
 import com.note.compose.ui.theme.home.utils.BottomNavItem
-import com.note.compose.ui.theme.home.utils.NoteItem
 import com.note.compose.ui.theme.home.utils.TagItem
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
+import androidx.compose.runtime.remember as remember1
 
 class HomeActivity : ComponentActivity() {
 
@@ -66,7 +68,7 @@ class HomeActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val bottomBarState = remember { mutableStateOf(true) } // Control visibility
+    val bottomBarState = remember1 { mutableStateOf(true) } // Control visibility
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     val items = listOf(
@@ -115,10 +117,10 @@ fun MainScreen() {
                 FloatingActionButton(
                     onClick = {
                         when (currentRoute) {
-                            "note" -> navController.navigate("add_note_screen/${""}/${""}/${"Select an Option"}") {
+                            "note" -> navController.navigate("add_note_screen/${""}/${""}/${""}/${"Select an Option"}") {
                                 popUpTo("note") { inclusive = false } // Ensure back navigation works
                             }
-                            "tag" -> navController.navigate("add_tag_screen/${""}") {
+                            "tag" -> navController.navigate("add_tag_screen/${""}/${""}") {
                                 popUpTo("tag") { inclusive = false } // Ensure back navigation works
                             }
                         }},
@@ -131,13 +133,13 @@ fun MainScreen() {
         },
         floatingActionButtonPosition = FabPosition.End,
     ) { innerPadding ->
-        val notes = remember { mutableStateListOf<NoteItem>() }
-        val tags = remember { mutableStateListOf<TagItem>() }
+        val notes = remember1 { mutableStateListOf<Note>() }
+        val tags = remember1 { mutableStateListOf<TagItem>() }
 
         NavigationHost(
             navController = navController,
             paddingValues = innerPadding,
-            bottomBarState = bottomBarState,notes,tags
+            bottomBarState = bottomBarState
         )
     }
 }
@@ -148,8 +150,6 @@ fun NavigationHost(
     navController: NavHostController,
     paddingValues: PaddingValues,
     bottomBarState: MutableState<Boolean>,
-    notes: SnapshotStateList<NoteItem>,
-    tags:SnapshotStateList<TagItem>
 ) {
     NavHost(
         navController = navController,
@@ -159,32 +159,41 @@ fun NavigationHost(
         composable("note") {
 
             bottomBarState.value = true // Show BottomBar
-            NoteScreen(navController)
+            NoteScreen(navController,FirebaseViewModel(),"")
         }
         composable("tag") {
             bottomBarState.value = true // Show BottomBar
-            TagScreen(navController)
+            TagScreen(navController,FirebaseViewModel(),"")
         }
-        composable(route = "add_note_screen/{title}/{description}/{option}",
+        composable(route = "add_note_screen/{id}/{title}/{description}/{tag}",
             arguments = listOf(
-                navArgument("title") { type = NavType.StringType ; defaultValue = ""},
-                navArgument("description") { type = NavType.StringType; defaultValue = "" },
-                navArgument("option") { type = NavType.StringType ; defaultValue = ""}
+                navArgument("id") { type = NavType.StringType },
+                navArgument("title") { type = NavType.StringType },
+                navArgument("description") { type = NavType.StringType },
+                navArgument("tag") { type = NavType.StringType }
             )) {
                 backStackEntry ->
 
-            val title = backStackEntry.arguments?.getString("title")?:""
-            val description = backStackEntry.arguments?.getString("description")?:""
-            val option = backStackEntry.arguments?.getString("option")?:""
+            // Retrieve arguments
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            val title = backStackEntry.arguments?.getString("title") ?: ""
+            val description = backStackEntry.arguments?.getString("description") ?: ""
+            val tag = backStackEntry.arguments?.getString("tag") ?: ""
 
-            AddNoteScreen(navController = navController,notes,title,description,option)
+            // If the id is not empty, it's an update; otherwise, it's a new note
+            val isEditMode = id.isNotEmpty()
+            AddNoteScreen(navController = navController,
+                 Note(id = id, title = title, description = description, tag = tag),
+                 viewModel = FirebaseViewModel(),"", isEditMode = isEditMode) // Flag to handle update)
             bottomBarState.value = false}
-        composable(route = "add_tag_screen/{tag}",
+        composable(route = "add_tag_screen/{id}/{tag}",
             arguments = listOf(
+                navArgument("id") { type = NavType.StringType },
                 navArgument("tag") { type = NavType.StringType }
             )) {  backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
             val tag = backStackEntry.arguments?.getString("tag")?:""
-            AddTagScreen(navController,tags,tag=tag)
+            AddTagScreen(navController, Tag(id,tag),viewModel= FirebaseViewModel(),"")
             bottomBarState.value = false}
     }
 }

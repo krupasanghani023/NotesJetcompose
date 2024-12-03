@@ -1,6 +1,6 @@
 package com.note.compose.ui.theme.home.note
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,12 +22,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -39,35 +38,38 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.note.compose.R
-import com.note.compose.ui.theme.home.tag.AddTagScreen
-import com.note.compose.ui.theme.home.utils.NoteItem
-import com.note.compose.ui.theme.home.utils.SharedPreferencesUtil
-import com.note.compose.ui.theme.home.utils.TagItem
+import com.note.compose.ui.theme.datamodel.Note
+import com.note.compose.ui.theme.datamodel.Tag
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddNoteScreen(navController: NavController,
-                  notes: SnapshotStateList<NoteItem>,
-                  title: String,
-                  description: String,
-                  option:String
+                  selectedNote: Note,
+                  viewModel: FirebaseViewModel,
+                  userId: String, isEditMode: Boolean
 ) {
     // Retrieve arguments passed from the previous screen
-    var noteTitle by remember { mutableStateOf( title) }
-    var noteDescription by remember { mutableStateOf( description) }
-    var selectedOption by remember { mutableStateOf(option) }
+    var title by remember { mutableStateOf(selectedNote.title ) }
+    var description by remember { mutableStateOf(selectedNote.description ) }
+    var selectedTag by remember { mutableStateOf(selectedNote.tag ) }
+    // Create a list of cities
+    var expanded by remember { mutableStateOf(false) }
+    var tagList by remember { mutableStateOf(listOf<Tag>()) }
 
+    // Fetch tags for the user
+    LaunchedEffect(userId) {
+        viewModel.getUserTags(userId) { tags ->
+            tagList = tags
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Create a list of cities
-        var expanded by remember { mutableStateOf(false) }
-
         val context = LocalContext.current
-        val options = remember { mutableStateListOf(*SharedPreferencesUtil.loadTags(context).toTypedArray()) }
 
         Column( modifier = Modifier
             .fillMaxSize()
@@ -80,10 +82,8 @@ fun AddNoteScreen(navController: NavController,
             )
             // title Input Field
             OutlinedTextField(
-                value = noteTitle,
-                onValueChange = { noteTitle = it
-                    Log.d("AddNoteScreen", "Title updated: $noteTitle")
-                },
+                value = title,
+                onValueChange = { title = it },
                 label = { Text(stringResource(id = R.string.title)) },
                 placeholder = { Text(stringResource(id = R.string.enter_title)) },
                 singleLine = true,
@@ -94,10 +94,8 @@ fun AddNoteScreen(navController: NavController,
 
             // description Input Field
             OutlinedTextField(
-                value = noteDescription,
-                onValueChange = { noteDescription = it
-                    Log.d("AddNoteScreen", "Description updated: $noteDescription")
-                },
+                value = description,
+                onValueChange = { description = it },
                 label = { Text(stringResource(id = R.string.description)) },
                 placeholder = { Text(stringResource(id = R.string.enter_description)) },
                 singleLine = true,
@@ -113,7 +111,7 @@ fun AddNoteScreen(navController: NavController,
                 onExpandedChange = { expanded = !expanded }
             ) {
                 OutlinedTextField(
-                    value = selectedOption,
+                    value = selectedTag,
                     onValueChange = {},
                     readOnly = true,
 //                    label = { Text("Select an option") },
@@ -133,14 +131,12 @@ fun AddNoteScreen(navController: NavController,
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    options.forEach { option ->
+                    tagList.forEach { tag ->
                         DropdownMenuItem(
-                            text = { Text(option.title) },
+                            text = { Text(tag.tagName) },
                             onClick = {
-                                selectedOption = option.title
+                                selectedTag = tag.tagName
                                 expanded = false
-                                Log.d("AddNoteScreen", "Selected option: $selectedOption")
-
                             }
                         )
                     }
@@ -150,17 +146,39 @@ fun AddNoteScreen(navController: NavController,
             // save Button
             OutlinedButton(
                 onClick = {
-                    // Add or update the note
-                    val noteIndex = notes.indexOfFirst { it.title == title && it.description == description }
-                    if (noteIndex != -1) {
-                        notes[noteIndex] = NoteItem(noteTitle, noteDescription, selectedOption)
-                    } else {
-                        notes.add(NoteItem(noteTitle, noteDescription, selectedOption))
+                    if (isEditMode) {
+                        viewModel.updateNoteInFirebase(userId = userId, noteId = selectedNote.id, title, description, selectedTag,
+                            onResult = {
+                                Toast.makeText(context, "Note update", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack() // Navigate back
+                            })
                     }
-                    SharedPreferencesUtil.saveNotes(context = context, notes) // Save the updated notes list
+                    else{
+                        // If editing, update the note
+                        if (title.isNotEmpty() && description.isNotEmpty() && selectedTag.isNotEmpty()) {
+                            val note = Note(
+                                title = title,
+                                description = description,
+                                tag = selectedTag
+                            )
+                            viewModel.addNote(
+                                userId = userId,
+                                note = note,
+                                onSuccess = {
+                                    Toast.makeText(context, "Note added", Toast.LENGTH_SHORT).show()
+                                    navController.popBackStack() // Navigate back
+                                },
+                                onFailure = { e ->
+                                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        } else {
+                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                        }
+                    }
 
-                    Log.d("AddNoteScreen", "Note saved: $noteTitle, $noteDescription, $selectedOption")
-                    navController.popBackStack() // Navigate back
+
+
                 },
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
@@ -172,7 +190,11 @@ fun AddNoteScreen(navController: NavController,
                 )
             ) {
                 Text(
-                    text = stringResource(id = R.string.save),
+                    text = (if (isEditMode) {
+                        stringResource(id = R.string.update)
+                    } else {
+                        stringResource(id = R.string.save)
+                    } ) ,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
@@ -185,6 +207,5 @@ fun AddNoteScreen(navController: NavController,
 @Preview(showBackground = true)
 fun PreviewAddNoteScreen(){
     val navController = rememberNavController()
-    val tags = remember{ SnapshotStateList<NoteItem>() }
-    AddNoteScreen(navController,tags,"","","")
+    AddNoteScreen(navController, Note(), viewModel = FirebaseViewModel(),"",true)
 }

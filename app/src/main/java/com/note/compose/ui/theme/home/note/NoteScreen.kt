@@ -13,14 +13,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,20 +37,47 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.note.compose.R
-import com.note.compose.ui.theme.home.utils.SharedPreferencesUtil
+import com.note.compose.ui.theme.datamodel.Note
+import com.note.compose.ui.theme.home.DeleteConfirmationDialog
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
+
 
 @Composable
-fun NoteScreen(navController: NavController
+fun NoteScreen(navController: NavController,
+               viewModel: FirebaseViewModel, userId: String
 ) {
 
     // Retrieve the saved notes from SharedPreferences
-    val context = LocalContext.current
-    val notes = remember { mutableStateListOf(*SharedPreferencesUtil.getNotes(context).toTypedArray()) }
+    val selectedNoteId = remember { mutableStateOf<String?>(null) }
+    val showDialog = remember { mutableStateOf(false) }
     // Save notes when the list is updated
-    LaunchedEffect(notes) {
-        SharedPreferencesUtil.saveNotes(context, notes)
+
+    var NoteList by remember { mutableStateOf(listOf<Note>()) }
+    // Fetch tags for the user
+    LaunchedEffect(userId) {
+        viewModel.getUserNotes(userId) { notes ->
+            NoteList = notes
+        }
     }
-    if (notes.isEmpty()) {
+    if (showDialog.value) {
+        selectedNoteId.value?.let { noteId ->
+            DeleteConfirmationDialog(
+                tagId = "",
+                noteId = noteId,
+                userId = userId,
+                onDismiss = { showDialog.value = false },
+                onConfirmDelete = {
+                    // After deletion, dismiss the dialog and refresh the notes list
+                    showDialog.value = false
+                    viewModel.getUserNotes(userId) { notes ->
+                        NoteList = notes
+                    } // Optionally refresh the list
+                },
+                viewModel
+            )
+        }
+    }
+    if (NoteList.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize()  // Take the full screen size
         ) {
@@ -61,7 +93,7 @@ fun NoteScreen(navController: NavController
             .padding(16.dp)) {
             Text(text = "Notes", style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(10.dp))
-            notes.forEachIndexed { index, note ->
+            NoteList.forEachIndexed { index, note ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -79,7 +111,7 @@ fun NoteScreen(navController: NavController
                                 fontSize = 17.sp
                             )
                             Text(
-                                text = note.option, maxLines = 2, fontSize = 13.sp
+                                text = note.tag, maxLines = 2, fontSize = 13.sp
                             )
                         }
                         Row(
@@ -88,7 +120,7 @@ fun NoteScreen(navController: NavController
                         ) {
                             Text(
                                 modifier = Modifier.padding(horizontal = 10.dp).clickable {
-                                    navController.navigate("add_note_screen/${note.title}/${note.description}/${note.option}")
+                                    navController.navigate("add_note_screen/${note.id}/${note.title}/${note.description}/${note.tag}")
                                     Log.d(
                                         "NoteScreen",
                                         "Navigating with title: $${note.title}, description: ${note.description}"
@@ -101,8 +133,9 @@ fun NoteScreen(navController: NavController
                             )
                             Text(
                                 modifier = Modifier.padding(end = 10.dp)
-                                    .clickable { notes.removeAt(index)
-                                        SharedPreferencesUtil.saveNotes(context, notes)
+                                    .clickable {  // Show confirmation dialog when delete button is clicked
+                                        selectedNoteId.value = note.id
+                                        showDialog.value = true
                                     }, text = "Delete",
                                 color = colorResource(id = R.color.color_B50202),
                                 fontWeight = FontWeight.Medium
@@ -118,9 +151,10 @@ fun NoteScreen(navController: NavController
 
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun NoteScreenPreview(){
     val navController = rememberNavController()
-    NoteScreen(navController)
+    NoteScreen(navController, viewModel = FirebaseViewModel(),"")
 }

@@ -2,12 +2,11 @@ package com.note.compose.ui.theme.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,7 +39,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -59,13 +57,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.note.compose.MainActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.note.compose.R
 import com.note.compose.ui.theme.forgotpassword.ForgotPasswordActivity
 import com.note.compose.ui.theme.home.HomeActivity
 import com.note.compose.ui.theme.login.ui.theme.ComposeTheme
 import com.note.compose.ui.theme.register.RegisterActivity
-import com.note.compose.ui.theme.register.model.UsesSharedPreferencesUtil.isUserValid
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +74,8 @@ class LoginActivity : ComponentActivity() {
                 LoginUi(
                     onLoginClick = { navigateToHomeScreen() },
                     onRegisterClick = { navigateToRegisterScreen() },
-                    onForgotPasswordClick = { navigateToForgotPasswordScreen() }
+                    onForgotPasswordClick = { navigateToForgotPasswordScreen() },
+                    viewModel()
                     )
             }
         }
@@ -100,26 +99,17 @@ class LoginActivity : ComponentActivity() {
 fun LoginUi(
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit) {
+    onForgotPasswordClick: () -> Unit,viewModel: FirebaseViewModel
+) {
     val context = LocalContext.current
     Box(
         modifier = Modifier
-            .fillMaxSize()
-//            .background(
-//                brush = Brush.linearGradient(
-//                    colors = listOf(
-//                        Color(0xFFF8F1FF), // Start color
-//                        Color(0xFFD7D2E7), // Middle color
-//                        Color(0xFFF6F4FD)  // End color
-//                    ),
-//                    start = Offset(0f, 0f), // Start position
-//                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY) // End position
-//                ))
-            ,
+            .fillMaxSize(),
         contentAlignment = Alignment.Center // Centers all content vertically and horizontally
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(15.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -169,6 +159,7 @@ fun LoginUi(
             ) {
                 var emailString by remember { mutableStateOf("") }
                 var passwordString by remember { mutableStateOf("") }
+                var errorMessage by remember { mutableStateOf("") }
 
                 EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString) {
                     emailString = it
@@ -181,15 +172,18 @@ fun LoginUi(
                         val email = emailString
                         val password = passwordString
 
-                        // Check if the user is valid
-                        if (isUserValid(context, email, password)) {
                             // Proceed to the next screen
-                            onLoginClick()
-                        } else {
-                            // Show error message
-                            Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
-                        }
-//                        onLoginClick()
+                            viewModel.login(email, password,
+                                onSuccess = { user ->
+                                    errorMessage = ""
+                                    emailString=""
+                                    passwordString=""
+                                    onLoginClick()
+                                },
+                                onFailure = { message ->
+                                    errorMessage = message
+                                    Log.d("MyTesting","errorMessage:_$errorMessage")
+                                })
                               },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier
@@ -326,7 +320,7 @@ fun PassWordTextFiled(
 @Composable
 fun LoginUiPreview() {
     ComposeTheme {
-        LoginUi(onLoginClick = { }, onForgotPasswordClick = {}, onRegisterClick = {})
+        LoginUi(onLoginClick = { }, onForgotPasswordClick = {}, onRegisterClick = {}, viewModel = FirebaseViewModel())
     }
 }
 

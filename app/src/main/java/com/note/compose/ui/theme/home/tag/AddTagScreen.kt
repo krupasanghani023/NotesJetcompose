@@ -20,24 +20,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.note.compose.R
+import com.note.compose.ui.theme.datamodel.Note
+import com.note.compose.ui.theme.datamodel.Tag
 import com.note.compose.ui.theme.home.utils.SharedPreferencesUtil
 import com.note.compose.ui.theme.home.utils.TagItem
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
 
 @Composable
 fun AddTagScreen(navController: NavController,
-                 tags: SnapshotStateList<TagItem>,
-                 tag:String) {
-    var tagName by remember { mutableStateOf(tag ) }
+                 tags: Tag,
+                 viewModel: FirebaseViewModel, userId: String) {
     val context = LocalContext.current // Get the context from the current Composable scope
+    var tagid by remember { mutableStateOf(tags.id) }
+    var tagName by remember { mutableStateOf(tags.tagName) }
+    var errorMessage by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -65,19 +72,61 @@ fun AddTagScreen(navController: NavController,
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
             )
+            //if tag empty set error msg
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
 
             // save Button
 
             OutlinedButton(
                 onClick = {
-                    val tagIndex = tags.indexOfFirst { it.title == tag }
-                    if (tagIndex != -1) {
-                        tags[tagIndex] = TagItem(tagName)
-                    } else {
-                        tags.add(TagItem(tagName))
+                    if (tagid.isEmpty()) { // Add new tag when tagid is empty
+                        if (tagName.isNotEmpty()) {
+                            val tag = Tag(
+                                id = "", // Will be populated later
+                                tagName = tagName
+                            )
+                            viewModel.addTag(
+                                userId = userId,
+                                tag = tag,
+                                onSuccess = {
+                                    tagName = "" // Clear the input field
+                                    errorMessage = ""
+                                    navController.popBackStack() // Navigate back
+                                },
+                                onFailure = { error ->
+                                    errorMessage = error.message ?: "Failed to add tag"
+                                }
+                            )
+                        } else {
+                            errorMessage = "Tag name cannot be empty"
+                        }
+                    } else { // Update existing tag when tagid is not empty
+                        if (tagName.isNotEmpty()) {
+                            viewModel.updateTagInFirebase(
+                                userId = userId,
+                                tagId = tagid,
+                                tagName = tagName,
+                                onResult = {
+                                    tagName = "" // Clear the input field
+                                    errorMessage = ""
+                                    navController.popBackStack() // Navigate back
+                                },
+
+                            )
+                        } else {
+                            errorMessage = "Tag name cannot be empty"
+                        }
                     }
-                    SharedPreferencesUtil.saveTags(context = context, tags) // Save the updated notes list
-                    navController.popBackStack() // Navigate back
+
+
+
 
                 },
                 shape = RoundedCornerShape(50),
@@ -90,11 +139,16 @@ fun AddTagScreen(navController: NavController,
                 )
             ) {
                 Text(
-                    text = stringResource(id = R.string.save),
+                    text = (if (!tagid.isEmpty()) {
+                        stringResource(id = R.string.update)
+                    } else {
+                        stringResource(id = R.string.save)
+                    } ) ,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
+
         }
     }
 }
@@ -103,6 +157,6 @@ fun AddTagScreen(navController: NavController,
 @Preview(showBackground = true)
 fun PreviewAddTagScreen(){
     val navController = rememberNavController()
-    val tags = remember{ SnapshotStateList<TagItem>() }
-    AddTagScreen(navController,tags,tag = "")
+    val tags = remember{ SnapshotStateList<Tag>() }
+    AddTagScreen(navController,Tag(), viewModel=FirebaseViewModel(), userId = "")
 }

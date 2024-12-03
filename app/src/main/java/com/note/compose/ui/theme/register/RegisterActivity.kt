@@ -1,15 +1,11 @@
 package com.note.compose.ui.theme.register
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract.CommonDataKinds.Email
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +16,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
@@ -33,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,12 +36,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -62,15 +53,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.note.compose.R
-import com.note.compose.ui.theme.home.HomeActivity
-import com.note.compose.ui.theme.login.EmailTextFiled
+import com.note.compose.ui.theme.datamodel.User
 import com.note.compose.ui.theme.login.LoginActivity
-import com.note.compose.ui.theme.login.PassWordTextFiled
-import com.note.compose.ui.theme.register.model.User
-import com.note.compose.ui.theme.register.model.UsesSharedPreferencesUtil
 import com.note.compose.ui.theme.register.ui.theme.ComposeTheme
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +66,7 @@ class RegisterActivity : ComponentActivity() {
 //        enableEdgeToEdge()
         setContent {
             ComposeTheme {
-               RegisterUI( onRegisterClick = { navigateToHomeScreen() })
+               RegisterUI( onRegisterClick = { navigateToHomeScreen() }, viewModel())
             }
         }
     }
@@ -89,7 +77,7 @@ class RegisterActivity : ComponentActivity() {
     }}
 
 @Composable
-fun RegisterUI( onRegisterClick: () -> Unit) {
+fun RegisterUI( onRegisterClick: () -> Unit,viewModel: FirebaseViewModel) {
     val context = LocalContext.current
 
     Box(modifier = Modifier
@@ -188,13 +176,14 @@ fun RegisterUI( onRegisterClick: () -> Unit) {
 
                                 if (isEmailValid && isPasswordValid) {
                                     // Proceed with registration
-                                            val newUser = User(name = nameString, email = emailString, password = passwordString)
-                                            val usersList = UsesSharedPreferencesUtil.getUsersFromPreferences(context = context) + newUser  // Add new user to existing list
-                                            UsesSharedPreferencesUtil.saveUsersToPreferences(context, usersList)
-
-                                            // Navigate to HomeActivity or LoginActivity
+                                    val user = User(userName = nameString, email = emailString, password = passwordString)
+                                    viewModel.addUser(user, onSuccess = {
+                                        // Navigate to HomeActivity or LoginActivity
                                             val intent = Intent(context, LoginActivity::class.java)
                                             context.startActivity(intent)
+                                    }, onFailure = { e ->
+                                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    })
                                         }
 
 
@@ -346,6 +335,6 @@ fun PassTextFiled(
 @Composable
 fun RegisterUIPreview() {
     ComposeTheme {
-        RegisterUI{}
+        RegisterUI(onRegisterClick = {}, viewModel = FirebaseViewModel())
     }
 }

@@ -28,5 +28,6 @@
     <string name="tag">Tag</string>
     <string name="description">Description</string>
     <string name="save">Save</string>
+    <string name="update">Update</string>
     <string name="title_activity_create_note">CreateNoteActivity</string>
 </resources>

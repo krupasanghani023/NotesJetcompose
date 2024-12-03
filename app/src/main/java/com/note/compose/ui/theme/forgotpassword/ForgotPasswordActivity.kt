@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.note.compose.R
 import com.note.compose.ui.theme.forgotpassword.ui.theme.ComposeTheme
 import com.note.compose.ui.theme.login.LoginActivity
+import com.note.compose.ui.theme.viewModel.FirebaseViewModel
 
 class ForgotPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,12 +58,15 @@ class ForgotPasswordActivity : ComponentActivity() {
 
 @Composable
 fun ForgotPasswordUI(onSubmitClick: () -> Unit) {
-    ForgotPasswordScreen(onSubmitClick)
+    ForgotPasswordScreen(FirebaseViewModel(),onSubmitClick)
 }
 
 @Composable
-fun ForgotPasswordScreen(onSubmitClick:()->Unit
+fun ForgotPasswordScreen(viewModel: FirebaseViewModel, onSubmitClick:()->Unit
 ) {
+    var email by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    var successMessage by remember { mutableStateOf("") }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -95,22 +100,51 @@ fun ForgotPasswordScreen(onSubmitClick:()->Unit
             )
 
             // Email Input Field
-            var email by remember { mutableStateOf("") }
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
+                isError = errorMessage.isNotEmpty(),
                 placeholder = { Text("Your email id") },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
             )
+            if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+            if (successMessage.isNotEmpty()) {
+                Text(
+                    text = successMessage,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
 
             // Submit Button
 
             OutlinedButton(
-                onClick = { },
+                onClick = { if (email.isNotBlank()) {
+                    viewModel.sendPasswordResetEmail(
+                        email = email,
+                        onSuccess = {
+                            successMessage = "Reset link sent to your email."
+                            errorMessage = ""
+                            onSubmitClick()
+                        },
+                        onFailure = { error ->
+                            errorMessage = error ?: "Failed to send reset link."
+                            successMessage = ""
+                        }
+                    )
+                } else {
+                    errorMessage = "Email cannot be empty."
+                }},
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
                     .fillMaxWidth()

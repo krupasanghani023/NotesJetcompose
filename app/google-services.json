@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "284577302623",
+    "firebase_url": "https://composenote-92c84-default-rtdb.firebaseio.com",
+    "project_id": "composenote-92c84",
+    "storage_bucket": "composenote-92c84.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284577302623:android:2009f6fad9840a91b933ea",
+        "android_client_info": {
+          "package_name": "com.note.compose"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBd-sSwD3f20viqg3vPxyWgj1Gk6eRrgyk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
