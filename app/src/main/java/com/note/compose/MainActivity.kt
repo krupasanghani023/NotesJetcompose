@@ -78,6 +78,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        (applicationContext as MyApplication).appComponent.inject(this)
+
         setContent {
             ComposeTheme  {
                 MainScreen()

@@ -17,8 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -27,10 +31,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.note.compose.MainActivity
 import com.note.compose.R
+import com.note.compose.ui.theme.home.HomeActivity
 import com.note.compose.ui.theme.login.LoginActivity
 import com.note.compose.ui.theme.splash.ui.theme.ComposeTheme
+import com.note.compose.util.getLoginState
 
 
 class SplashActivity : ComponentActivity() {
@@ -39,21 +44,50 @@ class SplashActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ComposeTheme {
-                    Greeting()
+                    Greeting{isLoggedIn ->
+                        navigateToHomeScreen(isLoggedIn) }
             }
         }
+    }
+    private fun navigateToHomeScreen(isLogin:Boolean) {
+
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(
-                this@SplashActivity,
-                LoginActivity::class.java
-            ))
+            if(isLogin) {
+                startActivity(
+                    Intent(
+                        this@SplashActivity,
+                        LoginActivity::class.java
+                    )
+                )
+            }
+            else{
+                startActivity(
+                    Intent(
+                        this@SplashActivity,
+                        HomeActivity::class.java
+                    )
+                )
+            }
             finish()
         }, 1500)
     }
 }
 
 @Composable
-fun Greeting() {
+fun Greeting(onNextScreen: (Boolean) -> Unit) {
+    val context= LocalContext.current
+    val isLoggedIn = remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        // Check login state on app launch
+        isLoggedIn.value = getLoginState(context)
+        if (isLoggedIn.value){
+            onNextScreen(false)
+        }
+        else{
+            onNextScreen(true)
+        }
+    }
     Row (modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center){
@@ -85,6 +119,6 @@ fun Greeting() {
 @Composable
 fun GreetingPreview() {
     ComposeTheme {
-        Greeting()
+        Greeting({ true })
     }
 }

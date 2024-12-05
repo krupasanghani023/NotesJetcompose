@@ -29,4 +29,6 @@
     <string name="description">Description</string>
     <string name="save">Save</string>
     <string name="title_activity_create_note">CreateNoteActivity</string>
+    <string name="title_activity_add_tag">AddTagActivity</string>
+    <string name="title_activity_add_note">AddNoteActivity</string>
 </resources>

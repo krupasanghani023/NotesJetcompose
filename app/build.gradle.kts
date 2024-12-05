@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.parcelize)
+
 }
 
 android {
@@ -63,7 +66,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.room.common.jvm)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.core.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -118,5 +123,24 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.4")
 
     implementation("com.google.code.gson:gson:2.8.8")
+    var dagger_version = "2.50"
+    implementation ("com.google.dagger:dagger:$dagger_version")
+    implementation ("com.google.dagger:dagger-android:$dagger_version")
+    implementation ("com.google.dagger:dagger-android-support:$dagger_version")
+    kapt ("com.google.dagger:dagger-compiler:$dagger_version")
+    kapt ("com.google.dagger:dagger-android-processor:$dagger_version")
+    annotationProcessor ("com.google.dagger:dagger-compiler:$dagger_version")
+    compileOnly ("javax.annotation:jsr250-api:1.0")
+    implementation ("javax.inject:javax.inject:1")
 
+    // Room dependencies
+    implementation ("androidx.room:room-runtime:2.6.1")
+    annotationProcessor ("androidx.room:room-compiler:2.6.1")
+
+    kapt ("androidx.room:room-compiler:2.6.1")  // For Kotlin (use kapt instead of annotationProcessor)
+
+    implementation ("androidx.datastore:datastore-preferences:1.1.1")
+}
+kapt {
+    generateStubs = true
 }

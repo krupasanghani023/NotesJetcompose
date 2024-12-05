@@ -1,5 +1,6 @@
 package com.note.compose.ui.theme.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -7,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +42,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -59,21 +61,40 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.note.compose.MainActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.note.compose.viewModel.UserViewModelFactory
+import com.note.compose.MyApplication
 import com.note.compose.R
 import com.note.compose.ui.theme.forgotpassword.ForgotPasswordActivity
 import com.note.compose.ui.theme.home.HomeActivity
 import com.note.compose.ui.theme.login.ui.theme.ComposeTheme
 import com.note.compose.ui.theme.register.RegisterActivity
-import com.note.compose.ui.theme.register.model.UsesSharedPreferencesUtil.isUserValid
+import com.note.compose.util.ResultState
+import com.note.compose.util.saveLoginState
+import com.note.compose.viewModel.UserViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class LoginActivity : ComponentActivity() {
+    @Inject
+    lateinit var userViewModelFactory: UserViewModelFactory
+
+    private lateinit var userViewModel: UserViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        (applicationContext as MyApplication).appComponent.inject(this)
+
         setContent {
+            userViewModel = ViewModelProvider(this, userViewModelFactory).get(UserViewModel::class.java)
+
             ComposeTheme {
                 LoginUi(
+                    viewModel = userViewModel,
                     onLoginClick = { navigateToHomeScreen() },
                     onRegisterClick = { navigateToRegisterScreen() },
                     onForgotPasswordClick = { navigateToForgotPasswordScreen() }
@@ -97,29 +118,42 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginUi(
+fun LoginUi(viewModel: UserViewModel,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit) {
+
+    var emailString by remember { mutableStateOf("") }
+    var passwordString by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val loginState by viewModel.loginState
+    when (loginState) {
+        is ResultState.Loading -> {
+            CircularProgressIndicator()
+        }
+        is ResultState.Success -> {
+            onLoginClick()
+            emailString=""
+            passwordString=""
+            Toast.makeText(context,"Login Success",Toast.LENGTH_SHORT).show()
+            LaunchedEffect(Unit) {
+                saveLoginState(context, true)
+            }
+        }
+        is ResultState.Error -> {
+            val error = (loginState as ResultState.Error).message
+            Toast.makeText(context,error,Toast.LENGTH_SHORT).show()
+        }
+        else -> {}
+    }
     Box(
         modifier = Modifier
-            .fillMaxSize()
-//            .background(
-//                brush = Brush.linearGradient(
-//                    colors = listOf(
-//                        Color(0xFFF8F1FF), // Start color
-//                        Color(0xFFD7D2E7), // Middle color
-//                        Color(0xFFF6F4FD)  // End color
-//                    ),
-//                    start = Offset(0f, 0f), // Start position
-//                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY) // End position
-//                ))
-            ,
+            .fillMaxSize(),
         contentAlignment = Alignment.Center // Centers all content vertically and horizontally
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(15.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -167,8 +201,6 @@ fun LoginUi(
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                var emailString by remember { mutableStateOf("") }
-                var passwordString by remember { mutableStateOf("") }
 
                 EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString) {
                     emailString = it
@@ -181,14 +213,8 @@ fun LoginUi(
                         val email = emailString
                         val password = passwordString
 
-                        // Check if the user is valid
-                        if (isUserValid(context, email, password)) {
-                            // Proceed to the next screen
-                            onLoginClick()
-                        } else {
-                            // Show error message
-                            Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
-                        }
+                            viewModel.loginUser(email, password)
+
 //                        onLoginClick()
                               },
                     shape = RoundedCornerShape(50),
@@ -273,6 +299,7 @@ fun EmailTextFiled(
             placeholder = { Text(text = hint) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             trailingIcon = {Icon(Icons.Filled.Email, "", tint = colorResource(id = R.color.gray_400))},
         )
     }
@@ -304,7 +331,7 @@ fun PassWordTextFiled(
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             trailingIcon = {
                 val image = if (passwordVisible)
                     Icons.Filled.Visibility
@@ -326,7 +353,7 @@ fun PassWordTextFiled(
 @Composable
 fun LoginUiPreview() {
     ComposeTheme {
-        LoginUi(onLoginClick = { }, onForgotPasswordClick = {}, onRegisterClick = {})
+        LoginUi(viewModel(),onLoginClick = { }, onForgotPasswordClick = {}, onRegisterClick = {})
     }
 }
 

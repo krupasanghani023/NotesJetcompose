@@ -1,15 +1,12 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.note.compose.ui.theme.register
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract.CommonDataKinds.Email
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,14 +17,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,17 +43,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -62,23 +61,31 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ViewModelProvider
+import com.note.compose.viewModel.UserViewModelFactory
+import com.note.compose.MyApplication
 import com.note.compose.R
-import com.note.compose.ui.theme.home.HomeActivity
-import com.note.compose.ui.theme.login.EmailTextFiled
+import com.note.compose.dataModels.User
 import com.note.compose.ui.theme.login.LoginActivity
-import com.note.compose.ui.theme.login.PassWordTextFiled
-import com.note.compose.ui.theme.register.model.User
-import com.note.compose.ui.theme.register.model.UsesSharedPreferencesUtil
 import com.note.compose.ui.theme.register.ui.theme.ComposeTheme
+import com.note.compose.util.ResultState
+import com.note.compose.viewModel.UserViewModel
+import javax.inject.Inject
+
 
 class RegisterActivity : ComponentActivity() {
+    @Inject
+    lateinit var userViewModelFactory: UserViewModelFactory
+
+    private lateinit var userViewModel: UserViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
+        (applicationContext as MyApplication).appComponent.inject(this)
+
         setContent {
+            userViewModel = ViewModelProvider(this, userViewModelFactory).get(UserViewModel::class.java)
             ComposeTheme {
-               RegisterUI( onRegisterClick = { navigateToHomeScreen() })
+               RegisterUI(viewModel = userViewModel, onRegisterClick = { navigateToHomeScreen() })
             }
         }
     }
@@ -89,8 +96,39 @@ class RegisterActivity : ComponentActivity() {
     }}
 
 @Composable
-fun RegisterUI( onRegisterClick: () -> Unit) {
+fun RegisterUI(viewModel: UserViewModel, onRegisterClick: () -> Unit) {
     val context = LocalContext.current
+    val userState by viewModel.userState
+
+    when (userState) {
+        is ResultState.Loading -> {
+            CircularProgressIndicator()
+        }
+        is ResultState.Success -> {
+           onRegisterClick()
+            Toast.makeText(context,"add user Success!", Toast.LENGTH_SHORT).show()
+
+        }
+        is ResultState.Error -> {
+            val error = (userState as ResultState.Error).message
+            Toast.makeText(context,error, Toast.LENGTH_SHORT).show()
+        }
+        else -> {}
+    }
+    TopAppBar(navigationIcon = {
+        IconButton(onClick = {onRegisterClick() }) {
+            Icon(Icons.Default.ArrowBackIosNew, "")
+        }
+    }, title = { Text(
+        text = stringResource(id = R.string.register),
+        fontSize = 28.sp,
+        color = colorResource(id = R.color.black),
+        fontStyle = FontStyle.Normal,
+        fontWeight = FontWeight.ExtraBold,
+        fontFamily = FontFamily.Serif,
+        textAlign = TextAlign.Justify,
+        modifier = Modifier
+    ) } )
 
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -98,40 +136,8 @@ fun RegisterUI( onRegisterClick: () -> Unit) {
     )
     {
         Column {
-            Text(
-                text = stringResource(id = R.string.register),
-                fontSize = 28.sp,
-                color = colorResource(id = R.color.black),
-                fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.ExtraBold,
-                fontFamily = FontFamily.Serif,
-                textAlign = TextAlign.Justify,
-                modifier = Modifier
-            )
-            Row {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 5.dp)
-                ) {
-                    Row{
-                        Text(
-                            text = stringResource(id = R.string.already_have_an_account),
-                            style = MaterialTheme.typography.titleSmall // Optional styling
-                        )
-                        Text(
-                            modifier = Modifier
-                                .padding(start = 5.dp)
-                                .clickable { onRegisterClick() },
-                            text = stringResource(id = R.string.login),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(id = R.color.color_5E35B1),
-                            textDecoration = TextDecoration.Underline
-                        )
-                    }
 
-                }
-            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -187,15 +193,8 @@ fun RegisterUI( onRegisterClick: () -> Unit) {
                                 // Save user data after registration
 
                                 if (isEmailValid && isPasswordValid) {
-                                    // Proceed with registration
-                                            val newUser = User(name = nameString, email = emailString, password = passwordString)
-                                            val usersList = UsesSharedPreferencesUtil.getUsersFromPreferences(context = context) + newUser  // Add new user to existing list
-                                            UsesSharedPreferencesUtil.saveUsersToPreferences(context, usersList)
-
-                                            // Navigate to HomeActivity or LoginActivity
-                                            val intent = Intent(context, LoginActivity::class.java)
-                                            context.startActivity(intent)
-                                        }
+                                    viewModel.addUser(User(System.currentTimeMillis(),nameString, emailString, passwordString))
+                                 }
 
 
                             },
@@ -217,6 +216,32 @@ fun RegisterUI( onRegisterClick: () -> Unit) {
                     }
                 }
             }
+
+        }
+    }
+    Row {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Row( modifier = Modifier.align(Alignment.BottomCenter)){
+                Text(
+                    text = stringResource(id = R.string.already_have_an_account),
+                    style = MaterialTheme.typography.titleSmall // Optional styling
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(start = 5.dp)
+                        .clickable { onRegisterClick() },
+                    text = stringResource(id = R.string.login),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(id = R.color.color_5E35B1),
+                    textDecoration = TextDecoration.Underline
+                )
+            }
+
         }
     }
 
@@ -244,7 +269,8 @@ fun NameTextFiled(
             placeholder = { Text(text = hint) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
-        )
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            )
     }
 
 }
@@ -258,7 +284,7 @@ fun allTextFiled( text: String = "") {
             fontSize = 17.sp,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 15.dp)
+                .padding(top = 15.dp, start = 2.dp)
         )
     }
 
@@ -288,7 +314,9 @@ fun EmailTextFiled(
             placeholder = { Text(text = hint) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
-        )
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+
+            )
         if (!isEmailValid) {
             Text("Invalid email address", color = Color.Red, fontSize = 12.sp)
         }
@@ -321,7 +349,7 @@ fun PassTextFiled(
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             trailingIcon = {
                 val image = if (passwordVisible)
                     Icons.Filled.Visibility
@@ -346,6 +374,6 @@ fun PassTextFiled(
 @Composable
 fun RegisterUIPreview() {
     ComposeTheme {
-        RegisterUI{}
+//        RegisterUI{}
     }
 }

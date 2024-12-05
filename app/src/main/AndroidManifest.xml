@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -13,9 +14,14 @@
         android:theme="@style/Theme.Compose"
         tools:targetApi="31">
         <activity
-            android:name=".ui.theme.home.note.CreateNoteActivity"
+            android:name=".ui.theme.home.tag.AddTagActivity"
             android:exported="false"
-            android:label="@string/title_activity_create_note"
+            android:label="@string/title_activity_add_tag"
+            android:theme="@style/Theme.Compose" />
+        <activity
+            android:name=".ui.theme.home.note.AddNoteActivity"
+            android:exported="false"
+            android:label="@string/title_activity_add_note"
             android:theme="@style/Theme.Compose" />
         <activity
             android:name=".ui.theme.forgotpassword.ForgotPasswordActivity"

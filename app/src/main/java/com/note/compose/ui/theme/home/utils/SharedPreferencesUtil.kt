@@ -3,9 +3,9 @@ package com.note.compose.ui.theme.home.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 
 object SharedPreferencesUtil {
 

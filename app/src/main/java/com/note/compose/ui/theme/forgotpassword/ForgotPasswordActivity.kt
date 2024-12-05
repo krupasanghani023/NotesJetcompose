@@ -43,11 +43,12 @@ class ForgotPasswordActivity : ComponentActivity() {
 //        enableEdgeToEdge()
         setContent {
             ComposeTheme {
-               ForgotPasswordUI(onSubmitClick = { navigateToHomeScreen() })
+                ForgotPasswordUI(onSubmitClick = { navigateToHomeScreen() })
             }
         }
 
     }
+
     private fun navigateToHomeScreen() {
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
@@ -60,7 +61,8 @@ fun ForgotPasswordUI(onSubmitClick: () -> Unit) {
 }
 
 @Composable
-fun ForgotPasswordScreen(onSubmitClick:()->Unit
+fun ForgotPasswordScreen(
+    onSubmitClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -146,6 +148,6 @@ fun ForgotPasswordScreen(onSubmitClick:()->Unit
 @Composable
 fun GreetingPreview2() {
     ComposeTheme {
-       ForgotPasswordUI(onSubmitClick = { })
+        ForgotPasswordUI(onSubmitClick = { })
     }
 }
