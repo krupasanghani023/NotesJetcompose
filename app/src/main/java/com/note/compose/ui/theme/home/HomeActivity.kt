@@ -3,6 +3,7 @@
 package com.note.compose.ui.theme.home
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,11 +12,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Logout
@@ -33,10 +39,12 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -56,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -298,32 +307,57 @@ fun MainScreen(
         )
     }
     // Confirmation Dialog
+
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false }, // Close dialog on outside click
-            title = {
-                Text(text = stringResource(id = R.string.logout_q),fontFamily = FontFamily.Serif)
-            },
-            text = {
-                Text(stringResource(id = R.string.are_you_sure_logout),fontFamily = FontFamily.Serif)
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDialog = false // Close dialog
-                    onLogoutClick()
-                    CoroutineScope(Dispatchers.IO).launch {
-                        saveLoginState(context, false)
+        Dialog(onDismissRequest = { showDialog = false}) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 8.dp,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    // Title
+                    Text(
+                        text =stringResource(id = R.string.logout_q),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp),fontFamily = FontFamily.Serif
+                    )
+
+                    // Message
+                    Text(
+                        text =stringResource(id = R.string.are_you_sure_logout),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 10.dp),
+                        fontFamily = FontFamily.Serif
+                    )
+
+                    // Buttons Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text(text = stringResource(id = R.string.cancel),fontFamily = FontFamily.Serif)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TextButton(onClick = {showDialog=false
+                            onLogoutClick()
+                            CoroutineScope(Dispatchers.IO).launch {
+                                saveLoginState(context, false)
+                            }
+                        }) {
+                            Text(text = stringResource(id = R.string.logout),fontFamily = FontFamily.Serif)
+                        }
                     }
-                }) {
-                    Text(stringResource(id = R.string.logout),fontFamily = FontFamily.Serif)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(id = R.string.cancel),fontFamily = FontFamily.Serif)
                 }
             }
-        )
+        }
     }
 }
 

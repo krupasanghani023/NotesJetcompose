@@ -4,14 +4,18 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -23,6 +27,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,11 +47,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.note.compose.R
 import com.note.compose.dataModels.Tag
 import com.note.compose.util.ResultState
+import com.note.compose.util.saveLoginState
 import com.note.compose.viewModel.TagViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
     fun TagScreen(viewModel: TagViewModel,
@@ -153,28 +163,53 @@ import com.note.compose.viewModel.TagViewModel
                             }
                             // Confirmation Dialog
                             if (showDialog) {
-                                AlertDialog(
-                                    onDismissRequest = { showDialog = false }, // Close dialog on outside click
-                                    title = {
-                                        Text(text = stringResource(id = R.string.delete_tag),fontFamily = FontFamily.Serif)
-                                    },
-                                    text = {
-                                        Text(stringResource(id = R.string.are_you_sure_delete_tag),fontFamily = FontFamily.Serif)
-                                    },
-                                    confirmButton = {
-                                        TextButton(onClick = {
-                                            showDialog = false // Close dialog
-                                            viewModel.deleteTag(tag.tagId)
-                                        }) {
-                                            Text(stringResource(id = R.string.delete), color = colorResource(id = R.color.color_B50202),fontFamily = FontFamily.Serif)
-                                        }
-                                    },
-                                    dismissButton = {
-                                        TextButton(onClick = { showDialog = false }) {
-                                            Text(stringResource(id = R.string.cancel),fontFamily = FontFamily.Serif)
+                                Dialog(onDismissRequest = { showDialog = false}) {
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = MaterialTheme.colorScheme.surface,
+                                        tonalElevation = 8.dp,
+                                        modifier = Modifier.padding(16.dp)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp)
+                                        ) {
+                                            // Title
+                                            Text(
+                                                text =stringResource(id = R.string.delete_tag),
+                                                style = MaterialTheme.typography.headlineSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(bottom = 8.dp),fontFamily = FontFamily.Serif
+                                            )
+
+                                            // Message
+                                            Text(
+                                                text =stringResource(id = R.string.are_you_sure_delete_tag),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.padding(bottom = 10.dp),
+                                                fontFamily = FontFamily.Serif
+                                            )
+
+                                            // Buttons Row
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.End
+                                            ) {
+                                                TextButton(onClick = { showDialog = false }) {
+                                                    Text(text = stringResource(id = R.string.cancel),fontFamily = FontFamily.Serif)
+                                                }
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                TextButton(onClick = {showDialog=false
+                                                    viewModel.deleteTag(tag.tagId)
+
+                                                }) {
+                                                    Text(text = stringResource(id = R.string.delete),fontFamily = FontFamily.Serif)
+                                                }
+                                            }
                                         }
                                     }
-                                )
+                                }
                             }
                         }
                     }
