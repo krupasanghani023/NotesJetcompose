@@ -140,6 +140,9 @@ dependencies {
     kapt ("androidx.room:room-compiler:2.6.1")  // For Kotlin (use kapt instead of annotationProcessor)
 
     implementation ("androidx.datastore:datastore-preferences:1.1.1")
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.1.0")
+    implementation ("androidx.constraintlayout:constraintlayout:2.2.0") // Update to the latest stable version
+
 }
 kapt {
     generateStubs = true

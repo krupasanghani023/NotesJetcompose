@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,6 +37,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +64,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import com.note.compose.viewModel.UserViewModelFactory
 import com.note.compose.MyApplication
@@ -80,8 +84,11 @@ class RegisterActivity : ComponentActivity() {
     private lateinit var userViewModel: UserViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         (applicationContext as MyApplication).appComponent.inject(this)
-
+        val windowInsetsController =
+            WindowInsetsControllerCompat(window, window.decorView)
+        windowInsetsController.isAppearanceLightStatusBars = false
         setContent {
             userViewModel = ViewModelProvider(this, userViewModelFactory).get(UserViewModel::class.java)
             ComposeTheme {
@@ -106,8 +113,6 @@ fun RegisterUI(viewModel: UserViewModel, onRegisterClick: () -> Unit) {
         }
         is ResultState.Success -> {
            onRegisterClick()
-            Toast.makeText(context,"add user Success!", Toast.LENGTH_SHORT).show()
-
         }
         is ResultState.Error -> {
             val error = (userState as ResultState.Error).message
@@ -115,110 +120,148 @@ fun RegisterUI(viewModel: UserViewModel, onRegisterClick: () -> Unit) {
         }
         else -> {}
     }
-    TopAppBar(navigationIcon = {
-        IconButton(onClick = {onRegisterClick() }) {
-            Icon(Icons.Default.ArrowBackIosNew, "")
-        }
-    }, title = { Text(
-        text = stringResource(id = R.string.register),
-        fontSize = 28.sp,
-        color = colorResource(id = R.color.black),
-        fontStyle = FontStyle.Normal,
-        fontWeight = FontWeight.ExtraBold,
-        fontFamily = FontFamily.Serif,
-        textAlign = TextAlign.Justify,
-        modifier = Modifier
-    ) } )
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = colorResource(id = R.color.color_5E35B1),
+                    titleContentColor = colorResource(id = R.color.white),
+                ),
+                title = {
+                    Text(
+                        text =
+                            stringResource(id = R.string.register) ,
+                        fontSize = 25.sp,
+                        color = colorResource(id = R.color.white),
+                        fontStyle = FontStyle.Normal,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = FontFamily.Serif,
+                        textAlign = TextAlign.Justify,
+                        modifier = Modifier
+                    )
+                },
+                navigationIcon = {
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 15.dp, vertical = 40.dp)
-    )
-    {
-        Column {
+                    IconButton(onClick = {
+                        onRegisterClick()
+                    }) {
+                        Icon(Icons.Default.ArrowBackIosNew, "", tint = colorResource(id = R.color.white))
+                    }
+                },
 
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
+                )
+        },
+    ){ innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(15.dp),
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    var nameString by remember { mutableStateOf("") }
+                    var emailString by remember { mutableStateOf("") }
+                    var passwordString by remember { mutableStateOf("") }
+                    var isEmailValid by remember { mutableStateOf(true) }
+                    var isPasswordValid by remember { mutableStateOf(true) }
 
+                    // Email validation regex
+                    val emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$".toRegex()
 
-                    Spacer(modifier = Modifier.height(40.dp)) // Adds space between the above text and the form
+                    // Email Validation Check
+                    val emailValidation = {
+                        isEmailValid = emailRegex.matches(emailString)
+                    }
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    // Password Validation Check
+                    val passwordValidation = {
+                        isPasswordValid = passwordString.length >= 6
+                    }
+                    allTextFiled("Name")
+                    NameTextFiled(
+                        hint = stringResource(id = R.string.enter_name),
+                        text = nameString
                     ) {
-                        var nameString by remember { mutableStateOf("") }
-                        var emailString by remember { mutableStateOf("") }
-                        var passwordString by remember { mutableStateOf("") }
-                        var isEmailValid by remember { mutableStateOf(true) }
-                        var isPasswordValid by remember { mutableStateOf(true) }
+                        nameString = it
+                    }
+                    allTextFiled("Email")
+                    EmailTextFiled(
+                        hint = stringResource(id = R.string.enter_email),
+                        text = emailString,
+                        isEmailValid = isEmailValid
+                    ) {
+                        emailString = it
+                    }
+                    allTextFiled("Password")
+                    PassTextFiled(
+                        hint = stringResource(id = R.string.enter_password),
+                        text = passwordString,
+                        isPasswordValid = isPasswordValid
+                    ) {
+                        passwordString = it
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            emailValidation()
+                            passwordValidation()
+                            // Save user data after registration
 
-                        // Email validation regex
-                        val emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$".toRegex()
-
-                        // Email Validation Check
-                        val emailValidation = {
-                            isEmailValid = emailRegex.matches(emailString)
-                        }
-
-                        // Password Validation Check
-                        val passwordValidation = {
-                            isPasswordValid = passwordString.length >= 6
-                        }
-                        allTextFiled("Name")
-                        NameTextFiled(hint = stringResource(id = R.string.enter_name), text = nameString) {
-                            nameString = it
-                        }
-                        allTextFiled("Email")
-                        EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString,isEmailValid=isEmailValid) {
-                            emailString = it
-                        }
-                        allTextFiled("Password")
-                        PassTextFiled(hint = stringResource(id = R.string.enter_password), text = passwordString,isPasswordValid=isPasswordValid) {
-                            passwordString = it
-                        }
-                        OutlinedButton(
-                            onClick = {
-                                emailValidation()
-                                passwordValidation()
-                                // Save user data after registration
-
-                                if (isEmailValid && isPasswordValid) {
-                                    viewModel.addUser(User(System.currentTimeMillis(),nameString, emailString, passwordString))
-                                 }
+                            if (isEmailValid && isPasswordValid) {
+                                viewModel.addUser(
+                                    User(
+                                        System.currentTimeMillis(),
+                                        nameString,
+                                        emailString,
+                                        passwordString
+                                    )
+                                )
+                            }
 
 
-                            },
-                            shape = RoundedCornerShape(50),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 25.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                contentColor = colorResource(id = R.color.white),
-                                containerColor = colorResource(id = R.color.color_5E35B1)
-                            )
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.create_account),
-                                fontSize = 20.sp,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                        }
+                        },
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 25.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = colorResource(id = R.color.white),
+                            containerColor = colorResource(id = R.color.color_5E35B1)
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.create_account),
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily.Serif,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                     }
                 }
             }
-
         }
     }
+
+//    Box(modifier = Modifier
+//        .fillMaxWidth()
+//        .padding(horizontal = 15.dp, vertical = 40.dp)
+//    )
+//    {
+//        Column {
+//
+//
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize(),
+//            ) {
+//
+//            }
+//
+//        }
+//    }
     Row {
         Box(
             modifier = Modifier
@@ -228,6 +271,7 @@ fun RegisterUI(viewModel: UserViewModel, onRegisterClick: () -> Unit) {
             Row( modifier = Modifier.align(Alignment.BottomCenter)){
                 Text(
                     text = stringResource(id = R.string.already_have_an_account),
+                    fontFamily = FontFamily.Serif,
                     style = MaterialTheme.typography.titleSmall // Optional styling
                 )
                 Text(
@@ -237,6 +281,7 @@ fun RegisterUI(viewModel: UserViewModel, onRegisterClick: () -> Unit) {
                     text = stringResource(id = R.string.login),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif,
                     color = colorResource(id = R.color.color_5E35B1),
                     textDecoration = TextDecoration.Underline
                 )
@@ -263,10 +308,10 @@ fun NameTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+            textStyle = TextStyle(brush = brush, fontSize = 17.sp,fontFamily = FontFamily.Serif,),
             modifier = Modifier
                 .fillMaxWidth(),
-            placeholder = { Text(text = hint) },
+            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif)},
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
@@ -282,6 +327,7 @@ fun allTextFiled( text: String = "") {
         Text(
             text = text,
             fontSize = 17.sp,
+            fontFamily = FontFamily.Serif,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 15.dp, start = 2.dp)
@@ -308,10 +354,10 @@ fun EmailTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+            textStyle = TextStyle(brush = brush, fontSize = 17.sp,fontFamily = FontFamily.Serif),
             modifier = Modifier
                 .fillMaxWidth(),
-            placeholder = { Text(text = hint) },
+            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
@@ -342,10 +388,10 @@ fun PassTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+            textStyle = TextStyle(brush = brush, fontSize = 17.sp,fontFamily = FontFamily.Serif,),
             modifier = Modifier
                 .fillMaxWidth(),
-            placeholder = { Text(text = hint) },
+            placeholder = { Text(text = hint,) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

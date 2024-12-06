@@ -142,7 +142,6 @@ fun LoginUi(viewModel: UserViewModel,
         }
         is ResultState.Error -> {
             val error = (loginState as ResultState.Error).message
-            Toast.makeText(context,error,Toast.LENGTH_SHORT).show()
         }
         else -> {}
     }
@@ -198,11 +197,11 @@ fun LoginUi(viewModel: UserViewModel,
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 0.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString) {
+                EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString,) {
                     emailString = it
                 }
                 PassWordTextFiled(hint = stringResource(id = R.string.enter_password), text = passwordString) {
@@ -215,7 +214,6 @@ fun LoginUi(viewModel: UserViewModel,
 
                             viewModel.loginUser(email, password)
 
-//                        onLoginClick()
                               },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier
@@ -228,6 +226,7 @@ fun LoginUi(viewModel: UserViewModel,
                 ) {
                     Text(
                         text = stringResource(id = R.string.login),
+                        fontFamily = FontFamily.Serif,
                         fontSize = 20.sp,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -266,6 +265,7 @@ fun LoginUi(viewModel: UserViewModel,
                     text = stringResource(id = R.string.register),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif,
                     color = colorResource(id = R.color.color_5E35B1),
                     textDecoration = TextDecoration.Underline
                 )
@@ -292,11 +292,12 @@ fun EmailTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+            textStyle = TextStyle(brush = brush, fontSize = 18.sp,fontFamily = FontFamily.Serif,),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 15.dp),
-            placeholder = { Text(text = hint) },
+
+            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
@@ -323,11 +324,11 @@ fun PassWordTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+            textStyle = TextStyle(brush = brush, fontSize = 17.sp,fontFamily = FontFamily.Serif),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 15.dp),
-            placeholder = { Text(text = hint) },
+            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

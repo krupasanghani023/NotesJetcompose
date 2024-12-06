@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -93,7 +95,8 @@ fun ForgotPasswordScreen(
                     .fillMaxWidth()
                     .padding(bottom = 15.dp),
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.ExtraBold
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = FontFamily.Serif
             )
 
             // Email Input Field
@@ -101,12 +104,13 @@ fun ForgotPasswordScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
-                placeholder = { Text("Your email id") },
+                label = { Text("Email",fontFamily = FontFamily.Serif) },
+                placeholder = { Text("Your email id",fontFamily = FontFamily.Serif) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
+                textStyle = TextStyle(fontFamily = FontFamily.Serif)
             )
 
             // Submit Button
@@ -124,6 +128,7 @@ fun ForgotPasswordScreen(
             ) {
                 Text(
                     text = stringResource(id = R.string.submit),
+                    fontFamily = FontFamily.Serif,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
@@ -135,6 +140,7 @@ fun ForgotPasswordScreen(
             ) {
                 Text(
                     text = stringResource(id = R.string.back_to_login),
+                    fontFamily = FontFamily.Serif,
                     fontSize = 16.sp,
                     color = colorResource(id = R.color.color_5E35B1)
                 )

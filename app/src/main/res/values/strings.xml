@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Compose</string>
+    <string name="app_name">Notes</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="dream_catcher">"Dream Catcher!"</string>
     <string name="welcome">"Welcome"</string>
@@ -31,4 +31,22 @@
     <string name="title_activity_create_note">CreateNoteActivity</string>
     <string name="title_activity_add_tag">AddTagActivity</string>
     <string name="title_activity_add_note">AddNoteActivity</string>
+    <string name="update">Update</string>
+    <string name="add_note">Add Note</string>
+    <string name="update_note">UpdateNote</string>
+    <string name="logout_q">Logout?</string>
+    <string name="are_you_sure_logout">Are you sure you want to Logout?</string>
+    <string name="logout">Logout</string>
+    <string name="cancel">Cancel</string>
+    <string name="note">Note</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_note">Delete Note?</string>
+    <string name="are_you_sure_delete_note">Are you sure you want to delete this note?</string>
+    <string name="no_notes_yet">No notes yet!</string>
+    <string name="are_you_sure_delete_tag">Are you sure you want to delete this tag?</string>
+    <string name="delete_tag">Delete Tag?</string>
+    <string name="no_tags_yet">No tags yet!</string>
+    <string name="add_tag">Add Tag</string>
+    <string name="update_tag">Update Tag</string>
 </resources>

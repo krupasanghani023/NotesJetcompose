@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,9 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +38,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -44,10 +50,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -93,14 +102,16 @@ class HomeActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
+        enableEdgeToEdge()
+        val windowInsetsController =
+            WindowInsetsControllerCompat(window, window.decorView)
+        windowInsetsController.isAppearanceLightStatusBars = false
         (applicationContext as MyApplication).appComponent.inject(this)
+        tagViewModel =
+            ViewModelProvider(this, tagViewModelFactory).get(TagViewModel::class.java)
+        noteViewModel =
+            ViewModelProvider(this, noteViewModelFactory).get(NoteViewModel::class.java)
         setContent {
-            tagViewModel =
-                ViewModelProvider(this, tagViewModelFactory).get(TagViewModel::class.java)
-            noteViewModel =
-                ViewModelProvider(this, noteViewModelFactory).get(NoteViewModel::class.java)
-
             ComposeTheme {
                 MainScreen(tagViewModel, noteViewModel, onLogoutClick = { navigateToLoginScreen() },
                     onEditTagClick = { tag -> navigateToAddTagScreen(tag) },
@@ -127,6 +138,14 @@ class HomeActivity : ComponentActivity() {
         intent.putExtra("note", noteJson) // Pass the Note instance
         startActivity(intent)
     }
+
+    override fun onResume() {
+        super.onResume()
+        CoroutineScope(Dispatchers.IO).launch {
+            tagViewModel.getTags() // Refresh tags
+            noteViewModel.getNotes() // Refresh notes
+        }
+    }
 }
 
 @Composable
@@ -137,14 +156,15 @@ fun MainScreen(
     onEditTagClick: (Tag) -> Unit,
     onEditNoteClick: (Note) -> Unit,
 ) {
+    var showDialog by remember { mutableStateOf(false) } // Dialog visibility
     val navController = rememberNavController()
     val bottomBarState = remember { mutableStateOf(true) } // Control visibility
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
     val items = listOf(
-        BottomNavItem("Note", "note", Icons.Default.Note),
-        BottomNavItem("Tag", "tag", Icons.Default.Tag)
+        BottomNavItem(stringResource(id = R.string.note), "note", Icons.Default.Note),
+        BottomNavItem(stringResource(id = R.string.tag), "tag", Icons.Default.Tag)
     )
     var mDisplayMenu by remember { mutableStateOf(false) }
 
@@ -152,45 +172,43 @@ fun MainScreen(
 
         topBar = {
             Column {
-                TopAppBar(title =
+                CenterAlignedTopAppBar(title =
                 {
                     Text(
                         text = currentRoute.toString().capitalize(),
                         fontWeight = FontWeight.SemiBold,
                         fontFamily = FontFamily.Serif,
-                        color = colorResource(id = R.color.black)
+                        fontSize = 25.sp,
+                        color = colorResource(id = R.color.white)
                     )
                 },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-//            containerColor = colorResource(id = R.color.white) // Change this to your desired color
+            containerColor = colorResource(id = R.color.color_5E35B1) // Change this to your desired color
                     ), actions = {
                         // Creating Icon button for dropdown menu
                         IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
-                            Icon(Icons.Default.MoreVert, "")
+                            Icon(Icons.Default.Menu, "", tint = colorResource(id = R.color.white))
                         }
                         DropdownMenu(
                             expanded = mDisplayMenu,
                             onDismissRequest = { mDisplayMenu = false }
                         ) {
-                            DropdownMenuItem(text = { Text(text = "Logout") }, onClick = {
-                                onLogoutClick()
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    saveLoginState(context, false)
-                                }
+                            DropdownMenuItem(text = { Text(text = stringResource(id = R.string.logout),fontFamily = FontFamily.Serif) }, onClick = {
+                                showDialog = true
                             })
                         }
                     }
                 )
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = colorResource(id = R.color.color_5E35B1)
-                )
-                Spacer(modifier = Modifier.height(2.dp)) // Adds space between the above text and the form
-
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = colorResource(id = R.color.color_5E35B1)
-                )
+//                HorizontalDivider(
+//                    thickness = 1.dp,
+//                    color = colorResource(id = R.color.color_5E35B1)
+//                )
+//                Spacer(modifier = Modifier.height(2.dp)) // Adds space between the above text and the form
+//
+//                HorizontalDivider(
+//                    thickness = 1.dp,
+//                    color = colorResource(id = R.color.color_5E35B1)
+//                )
 
 
             }
@@ -213,7 +231,7 @@ fun MainScreen(
                                     contentDescription = item.title
                                 )
                             },
-                            label = { Text(text = item.title) },
+                            label = { Text(text = item.title,fontFamily = FontFamily.Serif) },
                             selected = currentRoute == item.route,
                             onClick = {
                                 currentRoute == item.route
@@ -277,6 +295,34 @@ fun MainScreen(
             noteViewModel = noteViewModel,
             onEditTagClick = onEditTagClick,
             onEditNoteClick = onEditNoteClick
+        )
+    }
+    // Confirmation Dialog
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false }, // Close dialog on outside click
+            title = {
+                Text(text = stringResource(id = R.string.logout_q),fontFamily = FontFamily.Serif)
+            },
+            text = {
+                Text(stringResource(id = R.string.are_you_sure_logout),fontFamily = FontFamily.Serif)
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false // Close dialog
+                    onLogoutClick()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        saveLoginState(context, false)
+                    }
+                }) {
+                    Text(stringResource(id = R.string.logout),fontFamily = FontFamily.Serif)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(stringResource(id = R.string.cancel),fontFamily = FontFamily.Serif)
+                }
+            }
         )
     }
 }
