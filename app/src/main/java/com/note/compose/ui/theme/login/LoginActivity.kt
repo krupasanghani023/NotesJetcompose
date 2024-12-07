@@ -1,8 +1,8 @@
 package com.note.compose.ui.theme.login
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -73,9 +73,6 @@ import com.note.compose.ui.theme.register.RegisterActivity
 import com.note.compose.util.ResultState
 import com.note.compose.util.saveLoginState
 import com.note.compose.viewModel.UserViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class LoginActivity : ComponentActivity() {
@@ -142,6 +139,7 @@ fun LoginUi(viewModel: UserViewModel,
         }
         is ResultState.Error -> {
             val error = (loginState as ResultState.Error).message
+            Log.d("MyTesting","Error:-$error")
         }
         else -> {}
     }
@@ -198,15 +196,29 @@ fun LoginUi(viewModel: UserViewModel,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 0.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+//                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString,) {
+                EmailTextFiled(hint = stringResource(id = R.string.enter_email), text = emailString) {
                     emailString = it
                 }
                 PassWordTextFiled(hint = stringResource(id = R.string.enter_password), text = passwordString) {
                     passwordString = it
                 }
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, end = 2.dp)
+                        .clickable { onForgotPasswordClick()}
+                        .align(Alignment.End),
+                    text = stringResource(id = R.string.forgot_password),
+                    fontSize = 13.sp,
+                    color = colorResource(id = R.color.color_5E35B1),
+                    fontStyle = FontStyle.Normal,
+                    fontFamily = FontFamily.Serif,
+                    textAlign = TextAlign.End,
+
+                    )
                 OutlinedButton(
                     onClick = {
                         val email = emailString
@@ -231,19 +243,7 @@ fun LoginUi(viewModel: UserViewModel,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 15.dp)
-                        .clickable { onForgotPasswordClick() },
-                    text = stringResource(id = R.string.i_forgot_my_password),
-                    fontSize = 15.sp,
-                    color = colorResource(id = R.color.color_5E35B1),
-                    fontStyle = FontStyle.Normal,
-                    fontFamily = FontFamily.Serif,
-                    textAlign = TextAlign.Center,
 
-                )
             }
         }
     }
@@ -292,7 +292,7 @@ fun EmailTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 18.sp,fontFamily = FontFamily.Serif,),
+            textStyle = TextStyle(brush = brush, fontSize = 18.sp,fontFamily = FontFamily.Serif),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 15.dp),

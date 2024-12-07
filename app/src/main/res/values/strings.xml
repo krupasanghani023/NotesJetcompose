@@ -7,7 +7,6 @@
     <string name="title_activity_login">LoginActivity</string>
     <string name="enter_email">Enter Email</string>
     <string name="enter_password">Enter Password</string>
-    <string name="i_forgot_my_password">I forgot my password</string>
     <string name="login">Login</string>
     <string name="submit">Submit</string>
     <string name="dont_have_an_account">Don\'t have an account?</string>
@@ -49,4 +48,6 @@
     <string name="no_tags_yet">No tags yet!</string>
     <string name="add_tag">Add Tag</string>
     <string name="update_tag">Update Tag</string>
+    <string name="title_activity_more_option">MoreOptionActivity</string>
+    <string name="settings">Settings</string>
 </resources>

@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,8 +25,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Tag
@@ -173,10 +176,9 @@ fun MainScreen(
     val context = LocalContext.current
     val items = listOf(
         BottomNavItem(stringResource(id = R.string.note), "note", Icons.Default.Note),
-        BottomNavItem(stringResource(id = R.string.tag), "tag", Icons.Default.Tag)
+        BottomNavItem(stringResource(id = R.string.tag), "tag", Icons.Default.Tag),
+        BottomNavItem( "More","more",Icons.Default.MoreHoriz)
     )
-    var mDisplayMenu by remember { mutableStateOf(false) }
-
     Scaffold(
 
         topBar = {
@@ -193,32 +195,15 @@ fun MainScreen(
                 },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = colorResource(id = R.color.color_5E35B1) // Change this to your desired color
-                    ), actions = {
-                        // Creating Icon button for dropdown menu
-                        IconButton(onClick = { mDisplayMenu = !mDisplayMenu }) {
-                            Icon(Icons.Default.Menu, "", tint = colorResource(id = R.color.white))
-                        }
-                        DropdownMenu(
-                            expanded = mDisplayMenu,
-                            onDismissRequest = { mDisplayMenu = false }
-                        ) {
-                            DropdownMenuItem(text = { Text(text = stringResource(id = R.string.logout),fontFamily = FontFamily.Serif) }, onClick = {
-                                showDialog = true
-                            })
-                        }
+                    ), navigationIcon = {
+                        if(currentRoute.equals("more")){
+                            Log.d("MyTesting","if------")
+                        IconButton(onClick = { navController.popBackStack()}) {
+                            Icon(Icons.Default.ArrowBackIosNew, "", tint = colorResource(id = R.color.white))
+                        }}
+
                     }
                 )
-//                HorizontalDivider(
-//                    thickness = 1.dp,
-//                    color = colorResource(id = R.color.color_5E35B1)
-//                )
-//                Spacer(modifier = Modifier.height(2.dp)) // Adds space between the above text and the form
-//
-//                HorizontalDivider(
-//                    thickness = 1.dp,
-//                    color = colorResource(id = R.color.color_5E35B1)
-//                )
-
 
             }
 
@@ -303,7 +288,8 @@ fun MainScreen(
             viewModel = viewModel,
             noteViewModel = noteViewModel,
             onEditTagClick = onEditTagClick,
-            onEditNoteClick = onEditNoteClick
+            onEditNoteClick = onEditNoteClick,
+            onLogoutClick = onLogoutClick
         )
     }
     // Confirmation Dialog
@@ -314,12 +300,12 @@ fun MainScreen(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(2.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(top = 10.dp, start = 15.dp, end = 15.dp)
                 ) {
                     // Title
                     Text(
@@ -371,6 +357,7 @@ fun NavigationHost(
     noteViewModel: NoteViewModel,
     onEditTagClick: (Tag) -> Unit,
     onEditNoteClick: (Note) -> Unit,
+    onLogoutClick: () -> Unit,
 ) {
     NavHost(
         navController = navController,
@@ -384,6 +371,10 @@ fun NavigationHost(
         composable("tag") {
             bottomBarState.value = true // Show BottomBar
             TagScreen(viewModel, onEditTagClick)
+        }
+        composable("more") {
+            bottomBarState.value = false
+            SimpleSettingsScreen (onLogoutClick = onLogoutClick)
         }
     }
 }

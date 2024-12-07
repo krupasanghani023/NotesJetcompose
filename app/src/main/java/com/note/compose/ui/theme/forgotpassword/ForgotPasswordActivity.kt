@@ -69,12 +69,12 @@ fun ForgotPasswordScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(15.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(0.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -90,7 +90,7 @@ fun ForgotPasswordScreen(
             // Title
             Text(
                 text = stringResource(id = R.string.forgot_password),
-                fontSize = 17.sp,
+                fontSize = 20.sp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 15.dp),
@@ -104,8 +104,8 @@ fun ForgotPasswordScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email",fontFamily = FontFamily.Serif) },
-                placeholder = { Text("Your email id",fontFamily = FontFamily.Serif) },
+                label = { Text("Email",fontFamily = FontFamily.Serif,fontSize = 14.sp) },
+                placeholder = { Text("Your email id",fontFamily = FontFamily.Serif,fontSize = 14.sp) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -120,7 +120,7 @@ fun ForgotPasswordScreen(
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 25.dp),
+                    .padding(top = 20.dp),
                 colors = ButtonDefaults.buttonColors(
                     contentColor = colorResource(id = R.color.white),
                     containerColor = colorResource(id = R.color.color_5E35B1)
@@ -135,7 +135,7 @@ fun ForgotPasswordScreen(
             }
             // Back to Login Button
             TextButton(
-                onClick = { onSubmitClick },
+                onClick = { onSubmitClick() },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(

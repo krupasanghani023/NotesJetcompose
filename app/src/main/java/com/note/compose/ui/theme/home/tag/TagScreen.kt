@@ -168,12 +168,12 @@ import kotlinx.coroutines.launch
                                         shape = RoundedCornerShape(16.dp),
                                         color = MaterialTheme.colorScheme.surface,
                                         tonalElevation = 8.dp,
-                                        modifier = Modifier.padding(16.dp)
+                                        modifier = Modifier.padding(2.dp)
                                     ) {
                                         Column(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(16.dp)
+                                                .padding(top=16.dp, start = 15.dp, end = 15.dp)
                                         ) {
                                             // Title
                                             Text(

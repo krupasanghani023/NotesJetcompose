@@ -36,6 +36,7 @@ class NoteViewModel @Inject constructor(private val noteRepository: NoteReposito
             _noteState.value = ResultState.Loading
             try {
                 val notes = noteRepository.getNotes()
+                    .sortedByDescending { it.noteId }
                 _noteState.value = ResultState.Success(notes)
             } catch (e: Exception) {
                 _noteState.value = ResultState.Error("Failed to fetch notes: ${e.localizedMessage}")

@@ -308,10 +308,10 @@ fun NameTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp,fontFamily = FontFamily.Serif,),
+            textStyle = TextStyle(brush = brush, fontSize = 14.sp,fontFamily = FontFamily.Serif,),
             modifier = Modifier
                 .fillMaxWidth(),
-            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif)},
+            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif,fontSize = 14.sp)},
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
@@ -326,7 +326,7 @@ fun allTextFiled( text: String = "") {
     Column {
         Text(
             text = text,
-            fontSize = 17.sp,
+            fontSize = 14.sp,
             fontFamily = FontFamily.Serif,
             modifier = Modifier
                 .fillMaxWidth()
@@ -354,10 +354,10 @@ fun EmailTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp,fontFamily = FontFamily.Serif),
+            textStyle = TextStyle(brush = brush, fontSize = 14.sp,fontFamily = FontFamily.Serif),
             modifier = Modifier
                 .fillMaxWidth(),
-            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif) },
+            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif,fontSize = 14.sp) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
@@ -388,10 +388,10 @@ fun PassTextFiled(
         OutlinedTextField(
             value = text,
             onValueChange = onValueChange,
-            textStyle = TextStyle(brush = brush, fontSize = 17.sp,fontFamily = FontFamily.Serif,),
+            textStyle = TextStyle(brush = brush, fontSize = 14.sp,fontFamily = FontFamily.Serif),
             modifier = Modifier
                 .fillMaxWidth(),
-            placeholder = { Text(text = hint,) },
+            placeholder = { Text(text = hint,fontFamily = FontFamily.Serif,fontSize = 14.sp) },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

@@ -113,7 +113,7 @@ fun NoteScreen(notesViewModel: NoteViewModel,
                 ) {
 
                     Row(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(start = 8.dp, end = 1.dp, top = 1.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier
@@ -126,38 +126,53 @@ fun NoteScreen(notesViewModel: NoteViewModel,
                                 fontSize = 17.sp,
                                 fontFamily = FontFamily.Serif
                             )
-                            Spacer(modifier = Modifier.padding(2.dp))
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = Color.LightGray, // Background color
-                                        shape = RoundedCornerShape(8.dp) // Rounded corners
-                                    )
-                                    .padding(horizontal = 4.dp, vertical = 0.dp) // Internal padding for text
-                            ) {
-                                Text(
-                                    text = note.noteTag,
-                                    maxLines = 2,
-                                    fontSize = 13.sp,
-                                    fontFamily = FontFamily.Serif
-                                )
-                            }
+                          
                         }
                         Row(
                             modifier = Modifier
-                                .align(Alignment.CenterVertically)
                                 .wrapContentWidth(Alignment.End)
                         ) {
                             var expanded by remember { mutableStateOf(false) } // State to handle menu visibility
                             var showDialog by remember { mutableStateOf(false) } // Dialog visibility
 
-                            // Menu Icon
-                            IconButton(onClick = { expanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert, // Menu icon
-                                    contentDescription = "More options"
-                                )
+                            Column {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = colorResource(id = R.color.color_FDE1A0), // Background color
+                                            shape = RoundedCornerShape(8.dp) // Rounded corners
+                                        )
+                                        .padding(horizontal = 4.dp) // Internal padding for text
+                                        .align(Alignment.End)
+                                ) {
+                                    Text(
+                                        text = note.noteTag,
+                                        maxLines = 1,
+                                        fontSize = 7.sp,
+                                        fontFamily = FontFamily.Serif,
+                                        color = colorResource(id = R.color.black)
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+//                                        .background(
+//                                            color = colorResource(id = R.color.color_FDE1A0), // Background color
+//                                            shape = RoundedCornerShape(8.dp) // Rounded corners
+//                                        )
+                                        .padding(horizontal = 0.dp) // Internal padding for text
+                                        .align(Alignment.End)
+                                ) {
+                                    // Menu Icon
+                                    IconButton(onClick = { expanded = true }) {
+                                            Icon(
+                                                imageVector = Icons.Default.MoreVert, // Menu icon
+                                                contentDescription = "More options"
+                                            )
+                                    }
+                                }
                             }
+
+
 
                             // Dropdown Menu
                             DropdownMenu(
@@ -192,7 +207,7 @@ fun NoteScreen(notesViewModel: NoteViewModel,
                                         Column(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(16.dp)
+                                                .padding(top = 16.dp, start = 15.dp, end = 15.dp)
                                         ) {
                                             // Title
                                             Text(

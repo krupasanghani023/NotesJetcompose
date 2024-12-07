@@ -33,8 +33,12 @@ class TagViewModel @Inject constructor(private val tagRepository: TagRepository)
         viewModelScope.launch {
             _getTagState.value = ResultState.Loading
             try {
+
                 val tags = tagRepository.getTags()
+                    .sortedByDescending { it.tagId } // Sort by timestamp in descending order
                 _getTagState.value = ResultState.Success(tags)
+//                val tags = tagRepository.getTags()
+//                _getTagState.value = ResultState.Success(tags)
             } catch (e: Exception) {
                 _getTagState.value = ResultState.Error("Failed to fetch tags: ${e.localizedMessage}")
             }
