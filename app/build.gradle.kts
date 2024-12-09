@@ -40,7 +40,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
-//        compose = true
+        compose = true
         viewBinding=true
     }
     composeOptions {
@@ -144,6 +144,9 @@ dependencies {
     implementation ("androidx.datastore:datastore-preferences:1.1.1")
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.1.0")
     implementation ("androidx.constraintlayout:constraintlayout:2.2.0") // Update to the latest stable version
+
+    implementation ("io.coil-kt:coil-compose:2.4.0")
+
 
 }
 kapt {

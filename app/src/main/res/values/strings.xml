@@ -50,4 +50,6 @@
     <string name="update_tag">Update Tag</string>
     <string name="title_activity_more_option">MoreOptionActivity</string>
     <string name="settings">Settings</string>
+    <string name="title_activity_image_list">ImageListActivity</string>
+    <string name="image">Image</string>
 </resources>
