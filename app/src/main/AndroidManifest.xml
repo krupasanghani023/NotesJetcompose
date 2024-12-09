@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools" >
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
 
     <application
-        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -11,53 +19,22 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Compose"
-        tools:targetApi="31">
+        android:theme="@style/Base.Theme.Compose"
+        tools:targetApi="31" >
         <activity
-            android:name=".ui.theme.home.tag.AddTagActivity"
-            android:exported="false"
-            android:label="@string/title_activity_add_tag"
-            android:theme="@style/Theme.Compose" />
-        <activity
-            android:name=".ui.theme.home.note.AddNoteActivity"
-            android:exported="false"
-            android:label="@string/title_activity_add_note"
-            android:theme="@style/Theme.Compose" />
-        <activity
-            android:name=".ui.theme.forgotpassword.ForgotPasswordActivity"
-            android:exported="false"
-            android:label="@string/title_activity_forgot_password"
-            android:theme="@style/Theme.Compose" />
-        <activity
-            android:name=".ui.theme.register.RegisterActivity"
-            android:exported="false"
-            android:label="@string/title_activity_register"
-            android:theme="@style/Theme.Compose" />
-        <activity
-            android:name=".ui.theme.home.HomeActivity"
-            android:exported="false"
-            android:label="@string/title_activity_home"
-            android:theme="@style/Theme.Compose" />
-        <activity
-            android:name=".ui.theme.login.LoginActivity"
-            android:exported="false"
-            android:label="@string/title_activity_login"
-            android:theme="@style/Theme.Compose" />
-        <activity
-            android:name=".ui.theme.splash.SplashActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Compose">
+            android:name=".LocationActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Compose" />
+        <service
+            android:name=".LocationService"
+            android:foregroundServiceType="location"
+            android:exported="true" />
     </application>
+
 
 </manifest>
