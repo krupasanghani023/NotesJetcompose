@@ -43,6 +43,45 @@ class NoteViewModel @Inject constructor(private val noteRepository: NoteReposito
             }
         }
     }
+    fun getNotesDes() {
+        viewModelScope.launch {
+            _noteState.value = ResultState.Loading
+            try {
+                val notes = noteRepository.getNotes()
+                _noteState.value = ResultState.Success(notes)
+            } catch (e: Exception) {
+                _noteState.value = ResultState.Error("Failed to fetch notes: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun getNotesByTag(tag: String? = null) {
+        viewModelScope.launch {
+            _noteState.value = ResultState.Loading
+            try {
+                val notes = if (tag.isNullOrEmpty()) {
+                    noteRepository.getNotes().sortedByDescending { it.noteId }
+                } else {
+                    noteRepository.getNotesByTag(tag).sortedByDescending { it.noteId }
+                }
+                _noteState.value = ResultState.Success(notes)
+            } catch (e: Exception) {
+                _noteState.value = ResultState.Error("Failed to fetch notes: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun searchNotes(query: String) {
+        viewModelScope.launch {
+            _noteState.value = ResultState.Loading
+            try {
+                val notes = noteRepository.searchNotes(query).sortedByDescending { it.noteId }
+                _noteState.value = ResultState.Success(notes)
+            } catch (e: Exception) {
+                _noteState.value = ResultState.Error("Failed to fetch notes: ${e.localizedMessage}")
+            }
+        }
+    }
 
     fun editNote(noteId: String, noteTitle: String,noteContent:String,noteTag:String) {
         viewModelScope.launch {

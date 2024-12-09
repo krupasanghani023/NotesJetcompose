@@ -1,84 +1,122 @@
 package com.note.compose.ui.theme.home.utils
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import com.note.compose.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CenteredToolbar(
-    title: String,
-    onBackPressed: () -> Unit
-) {
-    ConstraintLayout(
+fun CenteredToolbar() {
+    val text by remember { mutableStateOf(TextFieldValue()) }
+
+    Row(
         modifier = Modifier
+            .height(40.dp)
             .fillMaxWidth()
-            .padding(8.dp)
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(8.dp))
+            .background(color = Color.White, shape = RoundedCornerShape(8.dp))
+            .clickable { /*onSearchClicked()*/ },
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        val (titleRef, tagRef) = createRefs()
-
-        // Title Text
-        Text(
-            text = "alk;aswoikodre  iojkm fillToConstraints   ",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 17.sp,
-            fontFamily = FontFamily.Serif,
-            modifier = Modifier.constrainAs(titleRef) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end) // Add space between title and tag
-                width = Dimension.fillToConstraints  // Title respects constraints
-            }
+        BasicTextField(
+            modifier = Modifier
+                .weight(5f)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            value = text,
+            onValueChange = {
+//                text = it
+//                onTextChange(it.text)
+            },
+//            enabled = isEnabled,
+            textStyle = TextStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontSize =16.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            decorationBox = { innerTextField ->
+                if (text.text.isEmpty()) {
+                    Text(
+                        text = "hint",
+                        color = Color.Gray.copy(alpha = 0.5f),
+                        fontSize =16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                innerTextField()
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(onSearch = {/* onSearchClicked()*/ }),
+            singleLine = true
         )
-
-        // Tag Text
-        Text(
-            text =" note.noteTag",
-            fontSize = 13.sp,
-            fontFamily = FontFamily.Serif,
-            color = Color.Gray,
-            modifier = Modifier.constrainAs(tagRef) {
-                start.linkTo(tagRef.end)
-                bottom.linkTo(titleRef.bottom) // Align tag to the bottom of the title
-                end.linkTo(tagRef.end) // Align tag to the end of the parent
-                width = Dimension.wrapContent // Title respects constraints
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .size(40.dp)
+                .background(color = Color.Transparent, shape = CircleShape)
+                .clickable {
+                },
+        ) {
+            if (text.text.isNotEmpty()) {
+                Icon(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp),
+                    painter = painterResource(id = R.drawable.ic_note_image),
+                    contentDescription = stringResource(R.string.logout),
+                    tint = MaterialTheme.colorScheme.primary,
+                    )
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp),
+                    painter = painterResource(id = R.drawable.ic_note_image),
+                    contentDescription = stringResource(R.string.logout),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
             }
-        )
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewCenteredToolbar() {
-    CenteredToolbar(
-        title = "Centered Title",
-        onBackPressed = { /* Handle back press */ }
-    )
+    CenteredToolbar( )
 }

@@ -182,7 +182,7 @@ fun AddTag(viewModel: TagViewModel,tag:Tag) {
                                 .fillMaxWidth()
                                 .padding(bottom = 8.dp),
                             textStyle = TextStyle(fontFamily = FontFamily.Serif),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done),
+                            keyboardOptions = KeyboardOptions( imeAction = ImeAction.Done),
                         )
 
                         // save Button

@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -69,6 +70,7 @@ fun NoteScreen(notesViewModel: NoteViewModel,
     var notesList by remember { mutableStateOf<List<Note>>(emptyList()) }
     val noteState by notesViewModel.noteState
     var hasFetchedNotes by remember { mutableStateOf(false) } // Flag to track if notes have been fetched
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
         if (!hasFetchedNotes) {
@@ -78,9 +80,19 @@ fun NoteScreen(notesViewModel: NoteViewModel,
     }
 
     when(noteState){
-        is ResultState.Loading-> CircularProgressIndicator()
+        is ResultState.Loading->{ Box(
+            modifier = Modifier
+                .fillMaxSize() // Fills the entire screen
+                .background(color = Color.White), // Optional: Set a background color
+            contentAlignment = Alignment.Center // Aligns the content to the center
+        ) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary // Customize the color
+            )
+        }}
         is ResultState.Success->{
             notesList = (noteState as ResultState.Success).data
+            keyboardController?.hide()
         }
         is ResultState.Error->{
             val error = (noteState as ResultState.Error).message
@@ -102,7 +114,7 @@ fun NoteScreen(notesViewModel: NoteViewModel,
     } else {
         LazyColumn(modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)) {
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)) {
             items(notesList){note ->
                 Card(
                     modifier = Modifier
@@ -237,7 +249,8 @@ fun NoteScreen(notesViewModel: NoteViewModel,
                                                 TextButton(onClick = {showDialog=false
                                                     notesViewModel.deleteNote(note.noteId) // Delete the note
                                                 }) {
-                                                    Text(text = stringResource(id = R.string.delete),fontFamily = FontFamily.Serif)
+                                                    Text(text = stringResource(id = R.string.delete),fontFamily = FontFamily.Serif,
+                                                        color = colorResource(id = R.color.color_B50202) )
                                                 }
                                             }
                                         }

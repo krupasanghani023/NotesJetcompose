@@ -230,7 +230,6 @@ fun AddNote(tagViewModel: TagViewModel,
                                 .padding(bottom = 8.dp),
                             textStyle = TextStyle(fontFamily = FontFamily.Serif),
                             keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Next
                             ),
 
@@ -260,7 +259,6 @@ fun AddNote(tagViewModel: TagViewModel,
                                 .padding(bottom = 15.dp),
                             textStyle = TextStyle(fontFamily = FontFamily.Serif),
                             keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Next
                             ),
                         )

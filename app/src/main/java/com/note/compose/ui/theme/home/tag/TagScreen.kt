@@ -1,5 +1,6 @@
 package com.note.compose.ui.theme.home.tag
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -64,10 +65,11 @@ import kotlinx.coroutines.launch
     val context = LocalContext.current
     var tagsList by remember { mutableStateOf<List<Tag>>(emptyList()) }
 
+
     val tagState by viewModel.getTagState
-    LaunchedEffect(Unit) {
-        viewModel.getTags()
-    }
+//    LaunchedEffect(Unit) {
+//        viewModel.getTags()
+//    }
     when (tagState) {
         is ResultState.Loading -> {
             CircularProgressIndicator()
@@ -204,7 +206,8 @@ import kotlinx.coroutines.launch
                                                     viewModel.deleteTag(tag.tagId)
 
                                                 }) {
-                                                    Text(text = stringResource(id = R.string.delete),fontFamily = FontFamily.Serif)
+                                                    Text(text = stringResource(id = R.string.delete),fontFamily = FontFamily.Serif,
+                                                        color = colorResource(id = R.color.color_B50202))
                                                 }
                                             }
                                         }
@@ -222,5 +225,5 @@ import kotlinx.coroutines.launch
 @Preview(showBackground = true)
 @Composable
 fun PreviewTagScreen() {
-    TagScreen(viewModel()) {}
+    TagScreen(viewModel(),{})
 }

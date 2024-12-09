@@ -44,6 +44,18 @@ class TagViewModel @Inject constructor(private val tagRepository: TagRepository)
             }
         }
     }
+    fun getTagsDesc() {
+        viewModelScope.launch {
+            _getTagState.value = ResultState.Loading
+            try {
+
+                val tags = tagRepository.getTags()
+                _getTagState.value = ResultState.Success(tags)
+            } catch (e: Exception) {
+                _getTagState.value = ResultState.Error("Failed to fetch tags: ${e.localizedMessage}")
+            }
+        }
+    }
 
     fun editTag(tagId: String,tagName: String) {
         viewModelScope.launch {

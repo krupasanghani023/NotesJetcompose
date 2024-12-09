@@ -9,4 +9,9 @@ class NoteRepository @Inject constructor(private val noteDao: NoteDao) {
     suspend fun getNotes() = noteDao.getNotes()
     suspend fun updateNote(noteId: String, noteTitle: String,noteContent:String,noteTag:String)=noteDao.updateNote(noteId, noteTitle,noteContent,noteTag)
     suspend fun deleteNote(noteId: String)=noteDao.deleteNote(noteId)
+    suspend fun getNotesByTag(noteTag: String)=noteDao.getNotesByTag(noteTag)
+
+    suspend fun searchNotes(query: String): List<Note> {
+        return noteDao.searchNotes(query)
+    }
 }

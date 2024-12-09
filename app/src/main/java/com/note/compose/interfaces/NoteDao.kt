@@ -19,4 +19,10 @@ interface NoteDao {
 
     @Query("DELETE FROM notes WHERE noteId = :noteId")
     suspend fun deleteNote(noteId: String)
+
+    @Query("SELECT * FROM notes WHERE noteTag LIKE :noteTag")
+    suspend fun getNotesByTag(noteTag: String): List<Note>
+
+    @Query("SELECT * FROM notes WHERE noteTag LIKE '%' || :query || '%'")
+    suspend fun searchNotes(query: String): List<Note>
 }
