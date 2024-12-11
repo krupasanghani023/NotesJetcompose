@@ -150,7 +150,13 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-pager:0.30.1")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
 
+//    implementation ("com.google.android.exoplayer:exoplayer:2.17.1") // Add ExoPlayer dependency
+//    implementation ("com.google.android.exoplayer:exoplayer:2.16.1")
 
+    implementation ("androidx.media3:media3-exoplayer:1.5.0")
+    implementation ("androidx.media3:media3-ui:1.5.0")
+    implementation ("androidx.media3:media3-common:1.5.0")
+    implementation ("com.google.accompanist:accompanist-insets:0.30.1") // Check for the latest version
 
 
 
