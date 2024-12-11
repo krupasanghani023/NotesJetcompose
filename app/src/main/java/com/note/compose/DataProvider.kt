@@ -16,7 +16,19 @@ data class VideoItem(
 
 )
 
+
 data class VideoContent(
     val id: Int,
     val videoItem: List<VideoItem>
+)
+
+// Main PostContent data class
+data class PostContent(
+    val id: Int,
+    val username: String,
+    val profilePicResId: Int, // Resource ID for the profile picture
+    val videoItem: List<VideoItem> = listOf(),
+    val images: List<ImageData> = listOf(),
+    val likes: Int = 0,
+    val comments: Int = 0
 )

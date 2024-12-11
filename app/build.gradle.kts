@@ -158,6 +158,11 @@ dependencies {
     implementation ("androidx.media3:media3-common:1.5.0")
     implementation ("com.google.accompanist:accompanist-insets:0.30.1") // Check for the latest version
 
+//    implementation ("com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.19")
+
+    implementation ("com.github.wseemann:FFmpegMediaMetadataRetriever-core:1.0.19")
+    implementation ("com.github.wseemann:FFmpegMediaMetadataRetriever-native:1.0.19")
+
 
 
 }
