@@ -3,11 +3,9 @@
 package com.note.compose
 
 import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,10 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
@@ -30,17 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -52,29 +43,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Lifecycle.Event.*
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.note.compose.ui.theme.ComposeTheme
 import com.google.accompanist.pager.rememberPagerState
-import com.note.compose.ui.theme.VideosViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -322,7 +301,7 @@ fun TopTabWithImageList() {
 @Composable
 fun InstaPostScreen(posts: List<PostContent>) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+//    val scope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = Modifier.fillMaxHeight(),
@@ -336,7 +315,7 @@ fun InstaPostScreen(posts: List<PostContent>) {
             when {
                 post.videoItem.isNotEmpty() -> {
                     // Render videos
-                    PostVideoContent(post,post.videoItem, context, scope)
+                    PostVideoContent(post,post.videoItem, context)
                 }
                 post.images.isNotEmpty() -> {
                     PostHeader(post)
@@ -381,7 +360,7 @@ fun PostHeader(post: PostContent) {
 
 @UnstableApi
 @Composable
-fun PostVideoContent(post: PostContent,videoItems: List<VideoItem>, context: Context, scope: CoroutineScope,
+fun PostVideoContent(post: PostContent,videoItems: List<VideoItem>, context: Context
 ) {
     val pagerState = rememberPagerState()
     var maxVideoHeight by remember { mutableStateOf(0) }

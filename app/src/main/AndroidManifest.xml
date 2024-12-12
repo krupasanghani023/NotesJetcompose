@@ -9,11 +9,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".dagger.MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -24,10 +24,21 @@
         android:theme="@style/Base.Theme.Compose"
         tools:targetApi="31">
         <activity
+            android:name=".dagger.ui.MainActivity"
+            android:exported="true"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Base.Theme.Compose">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ImageListActivity"
             android:exported="true"
             android:label="@string/title_activity_image_list"
-            android:theme="@style/Base.Theme.Compose" >
+            android:theme="@style/Base.Theme.Compose">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,9 +47,7 @@
         </activity>
         <activity
             android:name=".LocationActivity"
-            android:exported="true">
-
-        </activity>
+            android:exported="true"></activity>
 
         <service
             android:name=".LocationService"
