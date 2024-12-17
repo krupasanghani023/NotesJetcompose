@@ -1,4 +1,4 @@
-package com.note.compose
+package com.note.compose.dagger.model
 
 data class ImageContent(
     val id: Int,               // Unique ID for each image content

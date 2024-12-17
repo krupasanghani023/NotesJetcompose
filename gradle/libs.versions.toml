@@ -17,6 +17,11 @@ roomKtx = "2.6.1"
 firebaseFunctionsKtx = "21.1.0"
 datastoreCoreAndroid = "1.1.1"
 playServicesLocation = "21.3.0"
+workRuntimeKtx = "2.10.0"
+glide = "4.16.0"
+media3DatasourceCronet = "1.5.0"
+
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +47,10 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+androidx-media3-datasource-cronet = { group = "androidx.media3", name = "media3-datasource-cronet", version.ref = "media3DatasourceCronet" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

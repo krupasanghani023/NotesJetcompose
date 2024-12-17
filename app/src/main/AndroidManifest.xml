@@ -12,8 +12,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+<!--    android:name=".application.ReelsMain"-->
+    <!--        android:name=".dagger.MyApplication"-->
+
     <application
-        android:name=".dagger.MyApplication"
+        android:name=".dagger.application.FeedMain"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -23,17 +26,7 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.Compose"
         tools:targetApi="31">
-        <activity
-            android:name=".dagger.ui.MainActivity"
-            android:exported="true"
-            android:label="@string/title_activity_main"
-            android:theme="@style/Base.Theme.Compose">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".ImageListActivity"
             android:exported="true"
@@ -47,7 +40,7 @@
         </activity>
         <activity
             android:name=".LocationActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
 
         <service
             android:name=".LocationService"

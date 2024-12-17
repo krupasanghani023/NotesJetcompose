@@ -53,4 +53,7 @@
     <string name="title_activity_image_list">ImageListActivity</string>
     <string name="image">Image</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_demo.">Demo.Activity</string>
+    <string name="title_activity_demo">DemoActivity</string>
+    <string name="title_activity_new_main">NewMainActivity</string>
 </resources>

@@ -1,4 +1,3 @@
-@file:OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class)
 
 package com.note.compose
 
@@ -9,6 +8,7 @@ import android.util.Log
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,12 +48,17 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.note.compose.ui.theme.ComposeTheme
 import com.google.accompanist.pager.rememberPagerState
+import com.note.compose.dagger.composeui.HomeScreen
+import com.note.compose.dagger.model.ImageContent
+import com.note.compose.dagger.model.ImageData
+import com.note.compose.dagger.model.PostContent
+import com.note.compose.dagger.model.VideoContent
+import com.note.compose.dagger.model.VideoItem
+import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -75,10 +80,12 @@ class ImageListActivity : ComponentActivity() {
         }
     }
 }
+
+@OptIn(UnstableApi::class)
 @Composable
 fun TopTabWithImageList() {
-    val tabs = listOf("Images", "Video", "Post")
-    var selectedTabIndex by remember { mutableStateOf(1) }
+    val tabs = listOf("Home", "Video", "Image")
+    var selectedTabIndex by remember { mutableStateOf(0) }
     val context= LocalContext.current
 
     Column {
@@ -274,7 +281,8 @@ fun TopTabWithImageList() {
         // Display image list based on the selected tab
         when (selectedTabIndex) {
             0 -> {
-                ImageContentListWithPager(imageContents = imageContents)
+
+                HomeScreen(context).HomeScreen(context)
             }
             1 -> {
                 val context = LocalContext.current
@@ -289,7 +297,9 @@ fun TopTabWithImageList() {
             }
             2 -> { 
 //                InstaPostScreen(posts = postItems)
-                InstaPostScreen(posts = posts)
+//                InstaPostScreen(posts = posts)
+                ImageContentListWithPager(imageContents = imageContents)
+
             }
         }
     }
@@ -360,7 +370,8 @@ fun PostHeader(post: PostContent) {
 
 @UnstableApi
 @Composable
-fun PostVideoContent(post: PostContent,videoItems: List<VideoItem>, context: Context
+fun PostVideoContent(
+    post: PostContent, videoItems: List<VideoItem>, context: Context,
 ) {
     val pagerState = rememberPagerState()
     var maxVideoHeight by remember { mutableStateOf(0) }
@@ -462,7 +473,7 @@ fun PostVideoContent(post: PostContent,videoItems: List<VideoItem>, context: Con
 @Composable
 fun PostImageContent(images: List<ImageData>) {
     if (images.size == 1) {
-        GlideImage(model = images.first().drawableResId, contentDescription =null ,
+        GlideImage(imageModel = images.first().drawableResId, contentDescription =null ,
             modifier = Modifier.fillMaxWidth())
 
     } else {
@@ -478,7 +489,7 @@ fun PostImageContent(images: List<ImageData>) {
                 .aspectRatio(1f)
         ) { page ->
             GlideImage(
-                model = images[page].drawableResId,
+                imageModel = images[page].drawableResId,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
@@ -881,7 +892,7 @@ fun ImageContentListWithPager(imageContents: List<ImageContent>) {
                     ) { page ->
                         val image = imageContent.images[page]
                         GlideImage(
-                            model = image.drawableResId,
+                            imageModel = image.drawableResId,
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxSize()

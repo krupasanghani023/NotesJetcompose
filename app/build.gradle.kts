@@ -134,6 +134,7 @@ dependencies {
     annotationProcessor ("com.google.dagger:dagger-compiler:$dagger_version")
     compileOnly ("javax.annotation:jsr250-api:1.0")
     implementation ("javax.inject:javax.inject:1")
+    implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Room dependencies
     implementation ("androidx.room:room-runtime:2.6.1")
@@ -146,7 +147,6 @@ dependencies {
     implementation ("androidx.constraintlayout:constraintlayout:2.2.0") // Update to the latest stable version
 
     implementation ("io.coil-kt:coil-compose:2.4.0")
-    implementation ("com.github.bumptech.glide:compose:1.0.0-beta01")
     implementation ("com.google.accompanist:accompanist-pager:0.30.1")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
 
@@ -162,6 +162,19 @@ dependencies {
 
     implementation ("com.github.wseemann:FFmpegMediaMetadataRetriever-core:1.0.19")
     implementation ("com.github.wseemann:FFmpegMediaMetadataRetriever-native:1.0.19")
+    implementation("androidx.media3:media3-exoplayer-hls:1.5.0")
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.glide)
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.skydoves:landscapist-glide:1.3.1")
+    implementation("androidx.navigation:navigation-compose:2.7.6")
+
+    implementation ("org.chromium.net:cronet-embedded:119.6045.31")
+    implementation(libs.androidx.media3.datasource.cronet)
+
+    implementation ("com.google.android.exoplayer:exoplayer-core:2.19.1") // or latest version
+
 
 
 
