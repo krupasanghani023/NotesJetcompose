@@ -8,6 +8,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.hls.offline.HlsDownloader
+import androidx.media3.exoplayer.offline.ProgressiveDownloader
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @UnstableApi
 class VideoPreloadWorker(
@@ -85,22 +87,44 @@ class VideoPreloadWorker(
         }
     }
 
+//    private suspend fun preCacheVideoWithRetries(videoUrl: String, attempt: Int = 1): Boolean {
+//        return runCatching {
+//            if (preCacheVideo(videoUrl)) {
+////                Timber.tag(TAG).e("Cache success for position: $videoUrl")
+//                true
+//            }
+//            else throw Exception("Failed to cache video: $videoUrl")
+//        }.getOrElse {
+//            if (attempt < MAX_RETRY_ATTEMPTS) {
+//                delay(1000L * attempt)
+//                preCacheVideoWithRetries(videoUrl, attempt + 1)
+//            } else {
+//                Timber.tag(TAG).e("")
+//                Log.w("precaching", "Max retry attempts reached for $videoUrl")
+//                false
+//            }
+//        }
+//    }
+
     private suspend fun preCacheVideoWithRetries(videoUrl: String, attempt: Int = 1): Boolean {
+        val startTime = System.currentTimeMillis()
         return runCatching {
             if (preCacheVideo(videoUrl)) {
-//                Timber.tag(TAG).e("Cache success for position: $videoUrl")
+                Log.d(TAG, "Caching succeeded for $videoUrl in attempt $attempt")
                 true
-            }
-            else throw Exception("Failed to cache video: $videoUrl")
+            } else throw Exception("Failed to cache video: $videoUrl")
         }.getOrElse {
             if (attempt < MAX_RETRY_ATTEMPTS) {
-                delay(2000L * attempt)
+                Log.d(TAG, "Retrying $videoUrl after delay (attempt $attempt)")
+                delay(1000L * attempt)
                 preCacheVideoWithRetries(videoUrl, attempt + 1)
             } else {
-                Timber.tag(TAG).e("")
-                Log.w("precaching", "Max retry attempts reached for $videoUrl")
+                Log.e(TAG, "Max retry attempts reached for $videoUrl")
                 false
             }
+        }.also {
+            val endTime = System.currentTimeMillis()
+            Log.d(TAG, "Total caching time for $videoUrl: ${(endTime - startTime) / 1000} seconds")
         }
     }
 
@@ -112,11 +136,24 @@ class VideoPreloadWorker(
                 return true
             }
 
-            val downloader = HlsDownloader(
-                MediaItem.Builder().setUri(uri).build(),
-                mCacheDataSource,
-                executor
-            )
+//            val downloader = HlsDownloader(
+//                MediaItem.Builder().setUri(uri).build(),
+//                mCacheDataSource,
+//                executor
+//            )
+            val downloader = if (videoUrl.endsWith(".m3u8")) {
+                HlsDownloader(
+                    MediaItem.Builder().setUri(uri).build(),
+                    mCacheDataSource,
+                    executor
+                )
+            } else {
+                ProgressiveDownloader(
+                    MediaItem.Builder().setUri(uri).build(),
+                    mCacheDataSource,
+                    executor
+                )
+            }
 
             var totalBytesDownloaded = 0L
 

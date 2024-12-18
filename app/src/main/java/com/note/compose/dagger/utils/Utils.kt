@@ -9,8 +9,10 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import com.bumptech.glide.Glide
@@ -18,8 +20,12 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.note.compose.dagger.view.VideoPreloadWorker
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.net.URL
 import kotlin.random.Random
 
@@ -34,6 +40,17 @@ object Utils {
         workManager.enqueueUniqueWork(
             "ReelsVideoPreloadWorker", ExistingWorkPolicy.KEEP, videoPreloadWorker
         )
+
+//        val workManager = WorkManager.getInstance(context)
+//        val preloadRequests = VideoPreloadWorker.buildWorkRequest(videoUrl)
+//
+//        preloadRequests.forEach { request ->
+//            workManager.enqueueUniqueWork(
+//                "VideoPreloadWorker_${System.currentTimeMillis()}",
+//                ExistingWorkPolicy.KEEP,
+//                request
+//            )
+//        }
     }
 
     fun prefetchThumbnailForNextItem(context: Context, item: VideoModel) {

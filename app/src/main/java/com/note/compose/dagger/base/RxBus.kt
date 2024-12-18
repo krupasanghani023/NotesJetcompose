@@ -21,4 +21,5 @@ class RxEvent {
     data class HideMuteUnMuteIcon(val isHide:Boolean)
     data class ReelMuteUnMuteClick(val isMute:Boolean)
     data class LikeClick(val reel : VideoModel)
+    data class AppMoveInBackground(val isInBackground:Boolean)
 }

@@ -174,7 +174,10 @@ dependencies {
     implementation(libs.androidx.media3.datasource.cronet)
 
     implementation ("com.google.android.exoplayer:exoplayer-core:2.19.1") // or latest version
-
+    val media3_version = "1.5.0"
+    implementation("androidx.media3:media3-exoplayer-dash:$media3_version")
+    // For SmoothStreaming playback support with ExoPlayer
+    implementation("androidx.media3:media3-exoplayer-smoothstreaming:$media3_version")
 
 
 
