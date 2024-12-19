@@ -179,7 +179,11 @@ dependencies {
     // For SmoothStreaming playback support with ExoPlayer
     implementation("androidx.media3:media3-exoplayer-smoothstreaming:$media3_version")
 
+// Permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
+// Status Bar Color
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
 
 }
 kapt {

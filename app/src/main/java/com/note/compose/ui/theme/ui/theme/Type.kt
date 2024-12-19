@@ -1,4 +1,4 @@
-package com.note.compose.dagger.ui.ui.theme
+package com.note.compose.ui.theme.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

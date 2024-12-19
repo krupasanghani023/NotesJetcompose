@@ -8,12 +8,16 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,16 +30,19 @@ import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -49,17 +56,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
@@ -67,7 +81,13 @@ import androidx.media3.datasource.DefaultDataSourceFactory
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.memory.MemoryCache
+import coil.request.ImageRequest
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.note.compose.R
@@ -77,13 +97,14 @@ import com.note.compose.dagger.base.RxEvent
 import com.note.compose.dagger.utils.PostData
 import com.note.compose.dagger.utils.PostDataItem
 import com.note.compose.dagger.utils.Utils.getRandomPostData
+import com.note.compose.dagger.utils.Utils.preloadImages
 import com.note.compose.dagger.utils.Utils.schedulePreloadWork
 import com.skydoves.landscapist.glide.GlideImage
 import javax.inject.Inject
 
 
 @UnstableApi
-class HomeScreen(context: Context) {
+class HomeScreen() {
 
     @Inject
     lateinit var mCacheDataSourceFactory: CacheDataSource.Factory
@@ -159,12 +180,6 @@ class HomeScreen(context: Context) {
                                 isVideo = true,
                                 videoUrl = "https://assets.mixkit.co/videos/39766/39766-720.mp4",
                                 thumbnailUrl = "https://assets.mixkit.co/videos/39766/39766-thumb-360-0.jpg",
-                                data =dataSourceFactory
-                            ),
-                            PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://assets.mixkit.co/videos/2721/2721-720.mp4",
-                                thumbnailUrl = "https://assets.mixkit.co/videos/2721/2721-thumb-360-0.jpg",
                                 data =dataSourceFactory
                             )
                         )
@@ -362,7 +377,7 @@ class HomeScreen(context: Context) {
                             PostDataItem(
                                 isVideo = false,
                                 videoUrl = null,
-                                thumbnailUrl = "https://elements-resized.envatousercontent.com/elements-video-cover-images/dc6a4efe-cb6b-458f-bcfc-d5c50b884562/video_preview/video_preview_0000.jpg?w=400&h=225&cf_fit=cover&q=85&format=auto&s=734ffe7821fd0f770275b26906ff8b2f2222200b04af6d94ec23694593652d5c",
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/33caa28e-4994-46bb-e138-ef0ce972b900/public",
                                 data =dataSourceFactory
                             )
                         )
@@ -499,12 +514,12 @@ class HomeScreen(context: Context) {
                             PostDataItem(
                                 isVideo = false,
                                 videoUrl = null,
-                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/bd3575f1-5f7a-4f7e-1ea2-b60f6217c000/public",
+                                thumbnailUrl = "https://imagedelivery.net/SfQ1JcZUyel8V2cGv1XyWQ/11b75169-d28a-4821-a6f0-8c4cd3a49f00/public",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/thumbnails/thumbnail.jpg",
+                                videoUrl = "https://cloudflarestream.com/1927002acc179a4fe5d581f107575477/manifest/video.m3u8",
+                                thumbnailUrl = "https://cloudflarestream.com/1927002acc179a4fe5d581f107575477/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             )
                         )
@@ -522,11 +537,6 @@ class HomeScreen(context: Context) {
                                 videoUrl = null,
                                 thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/bd3575f1-5f7a-4f7e-1ea2-b60f6217c000/public",
                                 data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/a1883f641d36cc1cac5b71f3a7c8c1ef/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/a1883f641d36cc1cac5b71f3a7c8c1ef/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
                             )
                         )
                     )
@@ -538,25 +548,10 @@ class HomeScreen(context: Context) {
                 listOfMedia =  remember {
                     mutableStateOf(
                         listOf(
-                            PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/fa22ab95ea663067870219293ece1771/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/fa22ab95ea663067870219293ece1771/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
+                          PostDataItem(
                                 isVideo = true,
                                 videoUrl = "https://cloudflarestream.com/96cfaa6c824182bb0977d91efe513723/manifest/video.m3u8",
                                 thumbnailUrl = "https://cloudflarestream.com/96cfaa6c824182bb0977d91efe513723/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/9f1f33b1aa743f86145d83f1ccaf8273/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/9f1f33b1aa743f86145d83f1ccaf8273/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             )
                         )
@@ -582,7 +577,7 @@ class HomeScreen(context: Context) {
                             ),PostDataItem(
                                 isVideo = false,
                                 videoUrl =null,
-                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/b8ee759f-9ae5-4b22-d9ee-f1ab73d14900/public",
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/30596c9f-64c5-4c4f-ba1b-9439632be600/public",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = true,
@@ -604,11 +599,6 @@ class HomeScreen(context: Context) {
                                 isVideo = true,
                                 videoUrl = "https://cloudflarestream.com/14f3882a899275db7d6730c27d583990/manifest/video.m3u8",
                                 thumbnailUrl = "https://cloudflarestream.com/14f3882a899275db7d6730c27d583990/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = false,
@@ -641,12 +631,7 @@ class HomeScreen(context: Context) {
                                 videoUrl =null,
                                 thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/92511cc8-10e8-4904-cc69-d4425cf7e500/public",
                                 data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/d62bf75f9462d689f41ea6b42085a4d9/manifest/video.m3u8 ",
-                                thumbnailUrl = "https://cloudflarestream.com/d62bf75f9462d689f41ea6b42085a4d9/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            )
+                            ),
                         )
                     )
                 }
@@ -665,7 +650,7 @@ class HomeScreen(context: Context) {
                             ),PostDataItem(
                                 isVideo = false,
                                 videoUrl =null,
-                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/bd3575f1-5f7a-4f7e-1ea2-b60f6217c000/public",
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/95e2c969-eec7-45c2-09a5-4cba204b9100/public",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = true,
@@ -705,14 +690,14 @@ class HomeScreen(context: Context) {
                     mutableStateOf(
                         listOf(
                            PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/dfdcc53db6ec2dcce71732902f6e95f1/manifest/video.m3u8",
-                                thumbnailUrl ="https://cloudflarestream.com/dfdcc53db6ec2dcce71732902f6e95f1/thumbnails/thumbnail.jpg",
+                                isVideo = false,
+                                videoUrl = null,
+                                thumbnailUrl ="https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/e6b711eb-172d-4f02-62b7-aa38d7efed00/public",
                                 data =dataSourceFactory
                             ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/thumbnails/thumbnail.jpg",
+                                isVideo = false,
+                                videoUrl = null,
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/71fb2889-4471-45bc-39e1-11607bd55500/public",
                                 data =dataSourceFactory
                             )
                         )
@@ -755,11 +740,6 @@ class HomeScreen(context: Context) {
                                 isVideo = true,
                                 videoUrl = "https://cloudflarestream.com/de2fa92e1d70153759ac7e97e2cc4b65/manifest/video.m3u8",
                                 thumbnailUrl = "https://cloudflarestream.com/de2fa92e1d70153759ac7e97e2cc4b65/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/32a6963f4c4fbd299610faeb14db4635/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/32a6963f4c4fbd299610faeb14db4635/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             )
                         )
@@ -837,28 +817,18 @@ class HomeScreen(context: Context) {
                         listOf(
                            PostDataItem(
                                 isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/manifest/video.m3u8",
-                                thumbnailUrl ="https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/thumbnails/thumbnail.jpg",
+                                videoUrl = "https://cloudflarestream.com/cbadafe2d07edd930d2b20ddf7ecd185/manifest/video.m3u8",
+                                thumbnailUrl ="https://cloudflarestream.com/cbadafe2d07edd930d2b20ddf7ecd185/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/e082cbb8264b477aa89adabb844c16d9/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/e082cbb8264b477aa89adabb844c16d9/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/thumbnails/thumbnail.jpg",
+                                videoUrl = "https://cloudflarestream.com/3a5c263e97988cde271f63456fec5c27/manifest/video.m3u8",
+                                thumbnailUrl = "https://cloudflarestream.com/3a5c263e97988cde271f63456fec5c27/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = true,
                                 videoUrl = "https://cloudflarestream.com/a1883f641d36cc1cac5b71f3a7c8c1ef/manifest/video.m3u8",
                                 thumbnailUrl = "https://cloudflarestream.com/a1883f641d36cc1cac5b71f3a7c8c1ef/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             )
                         )
@@ -878,18 +848,8 @@ class HomeScreen(context: Context) {
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/96cfaa6c824182bb0977d91efe513723/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/96cfaa6c824182bb0977d91efe513723/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
                                 videoUrl = "https://cloudflarestream.com/9f1f33b1aa743f86145d83f1ccaf8273/manifest/video.m3u8",
                                 thumbnailUrl = "https://cloudflarestream.com/9f1f33b1aa743f86145d83f1ccaf8273/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/0b4326b30818e536b0eff4d0a64160f2/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/0b4326b30818e536b0eff4d0a64160f2/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             )
                         )
@@ -910,12 +870,12 @@ class HomeScreen(context: Context) {
                             ),PostDataItem(
                                 isVideo = false,
                                 videoUrl = null,
-                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/7d4b58c5-7833-4855-af92-566618389d00/public",
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/60cf184a-dda6-4fbb-3596-a63f5def9700/public",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = false,
                                 videoUrl = null,
-                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/b8ee759f-9ae5-4b22-d9ee-f1ab73d14900/public",
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/8fefb9bc-8cb7-45f9-47bb-2169624a1b00/public",
                                 data =dataSourceFactory
                             )
                         )
@@ -938,11 +898,6 @@ class HomeScreen(context: Context) {
                                 videoUrl = null,
                                 thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/b8ee759f-9ae5-4b22-d9ee-f1ab73d14900/public",
                                 data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/d62bf75f9462d689f41ea6b42085a4d9/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/d62bf75f9462d689f41ea6b42085a4d9/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
                             )
                         )
                     )
@@ -958,11 +913,6 @@ class HomeScreen(context: Context) {
                                 isVideo = true,
                                 videoUrl = "https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/manifest/video.m3u8",
                                 thumbnailUrl ="https://cloudflarestream.com/d370ca838d10e3927eae11803706309c/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/de2fa92e1d70153759ac7e97e2cc4b65/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/de2fa92e1d70153759ac7e97e2cc4b65/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
                             ),PostDataItem(
                                 isVideo = true,
@@ -985,11 +935,6 @@ class HomeScreen(context: Context) {
                                 videoUrl = "https://cloudflarestream.com/2669324cb2a6ca321ce21782e167665e/manifest/video.m3u8",
                                 thumbnailUrl ="https://cloudflarestream.com/2669324cb2a6ca321ce21782e167665e/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/83964a22277944c28e0de96efd1de6fe/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/83964a22277944c28e0de96efd1de6fe/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
                             )
                         )
                     )
@@ -1006,11 +951,6 @@ class HomeScreen(context: Context) {
                                 videoUrl = "https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/manifest/video.m3u8",
                                 thumbnailUrl ="https://cloudflarestream.com/965ba7e783e7b362b0648accdadedbf0/thumbnails/thumbnail.jpg",
                                 data =dataSourceFactory
-                            ),PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/e082cbb8264b477aa89adabb844c16d9/manifest/video.m3u8",
-                                thumbnailUrl = "https://cloudflarestream.com/e082cbb8264b477aa89adabb844c16d9/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
                             )
                         )
                     )
@@ -1025,9 +965,26 @@ class HomeScreen(context: Context) {
                            PostDataItem(
                                 isVideo = false,
                                 videoUrl = null,
-                                thumbnailUrl ="https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/c632b07c-fabf-48dc-d608-819007cd8e00/public",
+                                thumbnailUrl ="https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/dba68722-fcb7-412d-8b56-13534950f800/public",
                                 data =dataSourceFactory
                             ),PostDataItem(
+                                isVideo = false,
+                                videoUrl = null,
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/e1698af7-d875-468a-6ef0-19f244e99c00/public",
+                                data =dataSourceFactory
+                            )
+                        )
+                    )
+                }
+
+            ),PostData(
+                id = 40,
+                isLiked =  remember {mutableStateOf(false)},
+                likeCount =  remember {mutableStateOf(10)},
+                listOfMedia =  remember {
+                    mutableStateOf(
+                        listOf(
+                           PostDataItem(
                                 isVideo = false,
                                 videoUrl = null,
                                 thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/c632b07c-fabf-48dc-d608-819007cd8e00/public",
@@ -1037,21 +994,32 @@ class HomeScreen(context: Context) {
                     )
                 }
             ),PostData(
-                id = 40,
+                id = 41,
                 isLiked =  remember {mutableStateOf(false)},
                 likeCount =  remember {mutableStateOf(10)},
                 listOfMedia =  remember {
                     mutableStateOf(
                         listOf(
                            PostDataItem(
-                                isVideo = true,
-                                videoUrl = "https://cloudflarestream.com/d5e7c978639c85377269ba3a9fe12f7b/manifest/video.m3u8",
-                                thumbnailUrl ="https://cloudflarestream.com/d5e7c978639c85377269ba3a9fe12f7b/thumbnails/thumbnail.jpg",
-                                data =dataSourceFactory
-                            ),PostDataItem(
                                 isVideo = false,
                                 videoUrl = null,
-                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/c632b07c-fabf-48dc-d608-819007cd8e00/public",
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/1af7e0f2-9ebd-48c2-0e9c-da982d1fa900/public",
+                                data =dataSourceFactory
+                            )
+                        )
+                    )
+                }
+            ),PostData(
+                id = 42,
+                isLiked =  remember {mutableStateOf(false)},
+                likeCount =  remember {mutableStateOf(10)},
+                listOfMedia =  remember {
+                    mutableStateOf(
+                        listOf(
+                           PostDataItem(
+                                isVideo = false,
+                                videoUrl = null,
+                                thumbnailUrl = "https://imagedelivery.net/M33TG5iYcZNb7v4U4o4XeQ/c3a259fd-8c80-45ec-3e46-468e6bce2000/public",
                                 data =dataSourceFactory
                             )
                         )
@@ -1060,14 +1028,14 @@ class HomeScreen(context: Context) {
             ),
         )
         MyComposeList(
-            context = context, modifier = Modifier.background(Color.White), postData = postData
+            context = context, postData = postData
         )
     }
 
     @SuppressLint("CheckResult")
     @Composable
     fun MyComposeList(
-        context: Context, modifier: Modifier = Modifier, postData: List<PostData>
+        context: Context, postData: List<PostData>
     ) {
         var isMute by remember { mutableStateOf(false) }
 
@@ -1081,9 +1049,7 @@ class HomeScreen(context: Context) {
 
         DisposableEffect(Unit) {
             postData.forEach { _ ->
-                exoPlayerList.add(
-                    ExoPlayer.Builder(context).build()
-                )
+                exoPlayerList.add(ExoPlayer.Builder(context).build())
             }
             onDispose {
                 exoPlayerList.forEach { it?.release() }
@@ -1140,18 +1106,24 @@ class HomeScreen(context: Context) {
             }
         }
 
-
         LazyColumn(
-            state = listState, modifier = modifier
+            state = listState,
         ) {
             itemsIndexed(postData) { index, data ->
+                // Schedule video preloading
                 if (index == listState.firstVisibleItemIndex + 2 && index < postData.size - 1) {
-                    val list = data.listOfMedia.value.filter { it.isVideo == true }
+                    val videoUrls = data.listOfMedia.value.filter { it.isVideo == true }
                         .mapNotNull { it.videoUrl }
-                    if (list.isNotEmpty()) {
-                        schedulePreloadWork(context, list)
+                    if (videoUrls.isNotEmpty()) {
+                        schedulePreloadWork(context, videoUrls)
                     }
                 }
+
+                // Preload images using Glide
+                val imageUrls = data.listOfMedia.value.filter { it.isVideo != true }
+                    .mapNotNull { it.thumbnailUrl }
+                preloadImages(context, imageUrls)
+
                 PostItemUi(
                     context = context,
                     postData = data,
@@ -1183,270 +1155,423 @@ class HomeScreen(context: Context) {
                 exoPlayer?.pause()
             }
         }
+        Surface(modifier = Modifier.padding(top=6.dp, bottom = 6.dp)) {
 
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.Black)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_demo_img),
-                    contentDescription = "Profile Pic",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "AAAAAA", style = MaterialTheme.typography.bodyLarge,color = Color.White)
-            }
-            Box {
-                val pagerState = rememberPagerState()
-
-                HorizontalPager(
-                    count = postData.listOfMedia.value.size,
-                    state = pagerState,
-                    modifier = Modifier.fillMaxWidth()
-//                        .height(450.dp)
-                ) { page ->
-                    val postItem = postData.listOfMedia.value[page]
-                    val horizontalExoPlayer = remember { ExoPlayer.Builder(context).build() }
-                    horizontalExoPlayer.volume = if (isMute) 0f else 1f
-                    Column {
-
-                        Box(contentAlignment = Alignment.Center,
+            Column{
+// Create a row to hold the profile picture, username, and more options icon
+                Row(
+                    Modifier
+                        .fillMaxWidth() // Fill the width of the parent
+                        .padding(start = 6.dp, end = 6.dp, bottom = 8.dp), // Add padding around the row
+                    verticalAlignment = Alignment.CenterVertically // Center the children vertically
+                ) {
+                    // Create a column to hold the profile picture
+                    Column(
+                        Modifier
+                            .weight(1.1f) // Take up 1/8 of the row's width
+                            .padding(end = 16.dp) // Add padding to the end of the column
+                    ) {
+                        // Load the profile picture asynchronously
+                        AsyncImage(
+                            model = "https://images.pexels.com/photos/1308881/pexels-photo-1308881.jpeg?auto=compress&cs=tinysrgb&w=600",
+                            contentDescription = null, // No content
                             modifier = Modifier
-                                .height(150.dp)
-                                .fillMaxWidth()
-                                .pointerInput(Unit) {
-                                    detectTapGestures(onTap = {}, onDoubleTap = {
-                                        showLikeAnimation = true
-                                        if (!postData.isLiked.value) {
-                                            postData.isLiked.value = true
-                                            postData.likeCount.value++
+                                .size(30.dp) // Set the size of the image to 30dp
+                                .clip(CircleShape) // Clip the image to a circle shape
+                                .border( // Add a border to the image
+                                    width = 2.dp, // The width of the border is 2dp
+                                    brush = Brush.linearGradient( // The color of the border is a linear gradient
+                                        colors = listOf(
+                                            Color.Yellow,
+                                            Color.Red
+                                        ), // The colors of the gradient
+                                        start = Offset(0f, 0f), // The start point of the gradient
+                                        end = Offset(70f, 70f) // The end point of the gradient
+                                    ),
+                                    shape = CircleShape // The shape of the border is a circle
+                                )
+                                .clickable(onClick = {}), // Make the image clickable
+                            contentScale = ContentScale.Crop // Crop the image to fill the size of the ImageView
+                        )
+                    }
+
+                    // Create a column to hold the username and audio source
+                    Column(
+                        Modifier
+                            .weight(6f) // Take up 6/8 of the row's width
+                            .padding(end = 16.dp), // Add padding to the end of the column
+                                verticalArrangement = Arrangement.spacedBy(0.dp) // No space between the Text views
+
+                    ) {
+                        // Display the username
+                        Text(
+                            text = "o_ Olivia", // The username
+                            fontWeight = FontWeight.W600, // The font weight is normal
+                            fontSize = 14.sp, // The font size is 11sp
+                            lineHeight = 16.sp, // Adjust line height if needed
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis // Show ellipsis if text overflows
+                        )
+                        // Display the audio source
+                        Text(
+                            text = "o_ Olivia  •  Original audio ", // The audio source
+                            fontWeight = FontWeight.Normal, // The font weight is normal
+                            fontSize = 14.sp, // The font size is 10sp
+                            lineHeight = 16.sp, // Adjust line height if needed
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis // Show ellipsis if text overflows
+                        )
+                    }
+                    // Create a box to hold the more options icon
+                    Box(
+                        modifier = Modifier.weight(1f), // Take up 1/8 of the row's width
+                        contentAlignment = Alignment.CenterEnd // Center the icon at the end of the box
+                    ) {
+                        // Display the more options icon
+                        Icon(Icons.Default.MoreVert,
+                            contentDescription = null, // No content description is provided
+                            modifier = Modifier.size(26.dp)) // Set the size of the icon to 26dp
+                    }
+                }
+
+                //Image / Video
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState()) // Enable horizontal scrolling
+                        .fillMaxWidth(), // Fill the width of the parent
+
+                ) {
+                    val screenWidth = LocalConfiguration.current.screenWidthDp
+                    Box(
+                        modifier = Modifier
+                            .width(screenWidth.dp) // Set the width of the box to the screen width
+                            .aspectRatio(1f) // Set the aspect ratio of the box to 1 (for a square box)
+                    ) {
+                    val pagerState = rememberPagerState()
+
+                    HorizontalPager(
+                        count = postData.listOfMedia.value.size,
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) { page ->
+
+                        val postItem = postData.listOfMedia.value[page]
+                        val horizontalExoPlayer = remember { ExoPlayer.Builder(context).build() }
+                        // Preload the media source when the page becomes visible
+                        horizontalExoPlayer.volume = if (isMute) 0f else 1f
+                        Column {
+
+                            Box(contentAlignment = Alignment.Center,
+                                modifier = Modifier
+//                                .height(450.dp)
+                                    .fillMaxHeight()
+                                    .fillMaxWidth()
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(onTap = {}, onDoubleTap = {
+                                            showLikeAnimation = true
+                                            if (!postData.isLiked.value) {
+                                                postData.isLiked.value = true
+                                                postData.likeCount.value++
+                                            }
+                                        })
+                                    }) {
+
+                                if (postItem.isVideo == true) {
+
+
+                                    horizontalExoPlayer.addListener(object : Player.Listener {
+                                        override fun onPlayerStateChanged(
+                                            playWhenReady: Boolean, playbackState: Int
+                                        ) {
+                                            when (playbackState) {
+                                                Player.STATE_BUFFERING -> {
+                                                    needToShowProgressBar = true
+                                                }
+
+                                                Player.STATE_READY -> {
+                                                    isThumbnailVisible = false
+                                                    needToShowProgressBar = false
+                                                }
+
+                                                Player.STATE_IDLE -> {
+//                                                needToShowProgressBar = true
+                                                }
+
+                                                Player.STATE_ENDED -> {
+                                                    isThumbnailVisible = true
+                                                }
+                                            }
                                         }
                                     })
-                                }) {
+                                    AndroidView(
+                                        factory = {
+                                            PlayerView(context).apply {
+                                                this.player = horizontalExoPlayer
+                                                horizontalExoPlayer.setMediaSource(postItem.videoData?.mediaSource!!)
+                                                horizontalExoPlayer.repeatMode =
+                                                    ExoPlayer.REPEAT_MODE_ALL
+                                                horizontalExoPlayer.prepare()
+                                                this.useController = false
+//                                                this.resizeMode =
+//                                                    AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH // Set zoom mode
+//                                                this.resizeMode =
+//                                                    AspectRatioFrameLayout.RESIZE_MODE_ZOOM // Set zoom mode
 
-                            if (postItem.isVideo == true) {
-
-
-                                horizontalExoPlayer.addListener(object : Player.Listener {
-                                    override fun onPlayerStateChanged(
-                                        playWhenReady: Boolean, playbackState: Int
-                                    ) {
-                                        when (playbackState) {
-                                            Player.STATE_BUFFERING -> {
-                                                needToShowProgressBar = true
                                             }
+                                        }, modifier = Modifier.fillMaxHeight()
 
-                                            Player.STATE_READY -> {
-                                                isThumbnailVisible = false
-                                                needToShowProgressBar = false
+                                    )
+                                    horizontalExoPlayer?.volume = if (isMute) 0f else 1f
+
+                                    if (needToShowProgressBar) {
+                                        Box(
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier
+                                                    .height(40.dp)
+                                                    .width(40.dp),
+                                                color = colorResource(id = R.color.color_5E35B1)
+                                            )
+                                        }
+                                    }
+
+                                    // Manage playback based on current vertical and horizontal index
+                                    LaunchedEffect(currentPlayingIndex, pagerState.currentPage) {
+                                        if (isCurrentPlaying && pagerState.currentPage == page) {
+                                            horizontalExoPlayer.play()
+                                        } else {
+                                            horizontalExoPlayer.pause()
+                                        }
+                                    }
+                                    // Handle playback when app lifecycle changes
+                                    val lifecycleOwner = LocalLifecycleOwner.current
+                                    DisposableEffect(lifecycleOwner) {
+                                        val observer = LifecycleEventObserver { _, event ->
+                                            when (event) {
+                                                Lifecycle.Event.ON_PAUSE -> {
+                                                    Log.d(
+                                                        "VideoPlayerScreen",
+                                                        "App paused: Pausing ExoPlayer"
+                                                    )
+                                                    if (exoPlayer != null) {
+                                                        checkAndResumePlayback(
+                                                            isCurrentPlaying,
+                                                            pagerState.currentPage,
+                                                            page,
+                                                            exoPlayer
+                                                        )
+                                                        isCurrentPlaying =
+                                                            horizontalExoPlayer.isPlaying
+                                                    }
+
+                                                    horizontalExoPlayer.pause()
+                                                }
+
+                                                Lifecycle.Event.ON_RESUME -> {
+                                                    if (isCurrentPlaying && pagerState.currentPage == page) {
+
+                                                        horizontalExoPlayer.play()
+                                                    }
+                                                }
+
+                                                Lifecycle.Event.ON_DESTROY -> {
+
+                                                    horizontalExoPlayer.release()
+                                                }
+
+                                                Lifecycle.Event.ON_START -> {
+                                                    if (isCurrentPlaying && pagerState.currentPage == page) {
+
+                                                        horizontalExoPlayer.play()
+                                                    }
+                                                }
+
+                                                Lifecycle.Event.ON_STOP -> {
+                                                    if (isCurrentPlaying && pagerState.currentPage == page) {
+                                                        horizontalExoPlayer.pause()
+                                                    }
+                                                }
+
+                                                else -> {
+                                                    Log.d(
+                                                        "VideoPlayerScreen",
+                                                        "Other lifecycle event: $event"
+                                                    )
+
+                                                }
                                             }
+                                        }
 
-                                            Player.STATE_IDLE -> {
-//                                                needToShowProgressBar = true
-                                            }
+                                        lifecycleOwner.lifecycle.addObserver(observer)
 
-                                            Player.STATE_ENDED -> {
-                                                isThumbnailVisible = true
+                                        onDispose {
+                                            Log.d(
+                                                "VideoPlayerScreen",
+                                                "onDispose: Removing observer and releasing player"
+                                            )
+                                            lifecycleOwner.lifecycle.removeObserver(observer)
+                                            horizontalExoPlayer.release()
+                                        }
+                                    }
+
+                                    if (isThumbnailVisible) {
+                                        Column(
+                                            modifier = Modifier.align(Alignment.Center)
+                                        ) {
+                                            postItem.thumbnailUrl?.let {
+                                                AsyncImage(
+                                                    model = it,
+                                                    contentScale = ContentScale.Crop,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    contentDescription = null
+                                                )
                                             }
                                         }
                                     }
-                                })
-                                AndroidView(
-                                    factory = {
-                                        PlayerView(context).apply {
-                                            this.player = horizontalExoPlayer
-                                            horizontalExoPlayer.setMediaSource(postItem.videoData?.mediaSource!!)
-                                            horizontalExoPlayer.repeatMode =
-                                                ExoPlayer.REPEAT_MODE_ALL
-                                            horizontalExoPlayer.prepare()
-                                            this.useController = false
-                                        }
-                                    }, modifier = Modifier.fillMaxHeight()
-                                )
-
-                                if (needToShowProgressBar) {
-                                    Box(
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier
-                                                .height(40.dp)
-                                                .width(40.dp),
-                                            color = colorResource(id = R.color.color_5E35B1)
+                                } else {
+                                    postItem.thumbnailUrl?.let {
+                                        AsyncImage(
+                                            model = it,
+                                            contentDescription = null,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentScale = ContentScale.FillWidth
                                         )
                                     }
                                 }
 
-                                // Manage playback based on current vertical and horizontal index
-                                LaunchedEffect(currentPlayingIndex, pagerState.currentPage) {
-                                    if (isCurrentPlaying && pagerState.currentPage == page) {
-                                        horizontalExoPlayer.play()
-                                    } else {
-                                        horizontalExoPlayer.pause()
-                                    }
-                                }
-                                // Handle playback when app lifecycle changes
-                                val lifecycleOwner = LocalLifecycleOwner.current
-                                DisposableEffect(lifecycleOwner) {
-                                    val observer = LifecycleEventObserver { _, event ->
-                                        when (event) {
-                                            Lifecycle.Event.ON_PAUSE -> {
-                                                Log.d("VideoPlayerScreen", "App paused: Pausing ExoPlayer")
-                                                if (exoPlayer != null) {
-                                                    checkAndResumePlayback(isCurrentPlaying, pagerState.currentPage, page, exoPlayer)
-                                                    isCurrentPlaying=horizontalExoPlayer.isPlaying
-                                                }
-
-                                                horizontalExoPlayer.pause()
-                                            }
-
-                                            Lifecycle.Event.ON_RESUME -> {
-                                                 if (isCurrentPlaying && pagerState.currentPage == page) {
-
-                                                    horizontalExoPlayer.play()
-                                                }
-                                            }
-
-                                            Lifecycle.Event.ON_DESTROY -> {
-
-                                                horizontalExoPlayer.release()
-                                            }
-                                            Lifecycle.Event.ON_START->{
-                                                if (isCurrentPlaying && pagerState.currentPage == page) {
-
-                                                    horizontalExoPlayer.play()
-                                                }
-                                            }Lifecycle.Event.ON_STOP->{
-                                                if (isCurrentPlaying && pagerState.currentPage == page) {
-                                                    horizontalExoPlayer.pause()
-                                                }
-                                            }
-
-                                            else -> {
-                                                Log.d("VideoPlayerScreen", "Other lifecycle event: $event")
-
-                                            }
-                                        }
-                                    }
-
-                                    lifecycleOwner.lifecycle.addObserver(observer)
-
-                                    onDispose {
-                                        Log.d("VideoPlayerScreen", "onDispose: Removing observer and releasing player")
-                                        lifecycleOwner.lifecycle.removeObserver(observer)
-                                        horizontalExoPlayer.release()
-                                    }
+                                if (showLikeAnimation) {
+                                    DoubleTapLikeAnimation(modifier = Modifier.align(Alignment.Center),
+                                        iconResourceId = R.drawable.ic_double_tap_like,
+                                        onAnimationEnd = {
+                                            showLikeAnimation = false
+                                        })
                                 }
 
-                                if (isThumbnailVisible) {
-                                    Column(
-                                        modifier = Modifier.align(Alignment.Center)
-                                    ) {
-                                        postItem.thumbnailUrl?.let {
-                                            GlideImage(
-                                                imageModel = it,
-//                                                placeHolder = painterResource(id = R.drawable.ic_plc),
-//                                                error = painterResource(id = R.drawable.ic_plc),
-                                                contentScale = ContentScale.Crop,
-                                                modifier = Modifier.fillMaxWidth(),
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-                                }
-                            } else {
-                                postItem.thumbnailUrl?.let {
-                                    GlideImage(
-                                        imageModel = it,
-//                                        placeHolder = painterResource(id = R.drawable.ic_plc),
-//                                        error = painterResource(id = R.drawable.ic_plc),
-                                        contentScale = ContentScale.FillBounds,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentDescription = null
-                                    )
+                            }
+
+                            DisposableEffect(Unit) {
+                                onDispose {
+                                    horizontalExoPlayer.release()
                                 }
                             }
 
-                            if (showLikeAnimation) {
-                                DoubleTapLikeAnimation(modifier = Modifier.align(Alignment.Center),
-                                    iconResourceId = R.drawable.ic_double_tap_like,
-                                    onAnimationEnd = {
-                                        showLikeAnimation = false
-                                    })
-                            }
-
-                        }
-
-                        DisposableEffect(Unit) {
-                            onDispose {
-                                horizontalExoPlayer.release()
-                            }
                         }
 
                     }
-
-                }
 //                val pageCount = postItem
-                val pageCount = postData.listOfMedia.value.size
+                        val pageCount = postData.listOfMedia.value.size
 
-                if (pageCount > 1) {
-                    Text(
-                        text = "${pagerState.currentPage + 1}/$pageCount",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                            .background(
-                                color = Color.Black.copy(alpha = 0.6f),
-                                shape = RoundedCornerShape(12.dp)
+                        if (pageCount > 1) {
+                            Text(
+                                text = "${pagerState.currentPage + 1}/$pageCount",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(8.dp)
+                                    .background(
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                             )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+                        }
+}
                 }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+                // Content (Reactions)
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(), // Fill the width of the parent
+                    horizontalArrangement = Arrangement.SpaceBetween // Arrange the children with space between them
                 ) {
-                    IconButton(onClick = { /* Handle like button click */ }) {
-                        Icon(imageVector = Icons.Default.Favorite, contentDescription = null, tint =colorResource(id = R.color.gray_400))
+                    // Create a row to hold the reaction icons
+                    Row {
+                        // Create an icon button for likes
+                        IconButton(onClick = {  }) {
+                            Icon(
+                                painter = painterResource(R.drawable.heart), // Use the heart icon resource
+                                contentDescription = "Like Icon", // Provide a description for accessibility
+                                modifier = Modifier.size(20.dp) // Set the size of the icon to 20dp
+                            )
+                        }
+
+                        // Create an icon button for comments
+                        IconButton(onClick = {  }) {
+                            Icon(
+                                painter = painterResource(R.drawable.instagram_comment_icon), // Use the comment icon resource
+                                contentDescription = "Comment Icon", // Provide a description for accessibility
+                                modifier = Modifier.size(20.dp) // Set the size of the icon to 20dp
+                            )
+                        }
+
+                        // Create an icon button for share
+                        IconButton(onClick = {  }) {
+                            Icon(
+                                painter = painterResource(R.drawable.instagram_share_icon), // Use the share icon resource
+                                contentDescription = "Share Icon", // Provide a description for accessibility
+                                modifier = Modifier.size(20.dp) // Set the size of the icon to 20dp
+                            )
+                        }
                     }
-                    Text(text = "${postData.likeCount.value}", color = Color.White)
+
+                    // Create an icon button for save
+                    IconButton(onClick = {  }) {
+                        Icon(
+                            painter = painterResource(R.drawable.saved_icon), // Use the save icon resource
+                            contentDescription = "Save Icon", // Provide a description for accessibility
+                            modifier = Modifier.size(20.dp) // Set the size of the icon to 20dp
+                        )
+                    }
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { /* Handle comment button click */ }) {
-                        Icon(imageVector = Icons.Default.Comment, contentDescription = null,tint =colorResource(id = R.color.gray_400))
+// Create a column to hold the likes, comments, and timestamp
+                Column(modifier = Modifier.padding(
+                    start = 10.dp,
+                    end = 10.dp,
+                    top = 1.dp,
+                    bottom =4.dp
+                )) {
+                    // Display the number of likes
+                    Row{
+                        Text(
+                            text = "2993 likes",
+                            fontWeight = FontWeight.Bold, // The font weight is bold
+                            fontSize = 15.sp // The font size is 15sp
+                        )
                     }
-                    Text(text = "Comments",color = Color.White)
+
+                    // Display the comments
+                    Row{
+                        Text(
+                            text = "o_donnel ", // The username
+                            fontWeight = FontWeight.Bold, // The font weight is bold
+                            fontSize = 15.sp // The font size is 15sp
+                        )
+                        Text(
+                            text = "Discover new people", // The comment
+                            fontWeight = FontWeight.Normal, // The font weight is normal
+                            fontSize = 13.sp // The font size is 13sp
+                        )
+                    }
+
+                    // Display the total number of comments
+                    Row{
+                        Text(text = "view all 138 comments",
+                            fontWeight = FontWeight.Thin, // The font weight is thin
+                            fontSize = 13.sp // The font size is 13sp
+                        )
+                    }
+
+                    // Display the timestamp
+                    Row{
+                        Text(text = "9 minutes ago",
+                            fontWeight = FontWeight.Thin, // The font weight is thin
+                            fontSize = 13.sp // The font size is 13sp
+                        )
+                    }
                 }
 
-                IconButton(onClick = { /* Handle share button click */ }) {
-                    Icon(imageVector = Icons.Default.Share, contentDescription = null,tint =colorResource(id = R.color.gray_400))
-                }
             }
-//            FooterUserAction(
-//                postData = postData,
-//                modifier = Modifier.padding(top = 15.dp),
-//                isMute = isMute,
-//                isVideo = true,
-//                exoPlayer = exoPlayer
-//            )
         }
     }
 

@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -28,7 +29,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @UnstableApi
 class VideoPreloadWorker(
     appContext: Context,
-    workerParams: WorkerParameters,
+    workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
 
     private var videoCachingJob: Job? = null
@@ -40,24 +41,19 @@ class VideoPreloadWorker(
     lateinit var cache: SimpleCache
 
     private val executor = Executors.newSingleThreadExecutor()
-    private val TAG = "VideoAdapter"
+    private val TAG = "VideoPreloadWorker"
     private val PRE_CACHE_SIZE = 1000000
     private val MAX_RETRY_ATTEMPTS = 2
 
     companion object {
-        const val VIDEO_URLS = "video_urls"
+        const val VIDEO_URL = "video_url"
 
-        fun buildWorkRequest(videoUrlList: List<String>): List<OneTimeWorkRequest> {
-            val onetimeNetworkRequestList = arrayListOf<OneTimeWorkRequest>()
-            videoUrlList.forEach { videoUrl ->
-                val data = Data.Builder().putString(VIDEO_URLS, videoUrl).build()
-                onetimeNetworkRequestList.add(
-                    OneTimeWorkRequestBuilder<VideoPreloadWorker>().apply {
-                        setInputData(data)
-                    }.build()
-                )
+        fun buildWorkRequest(videoUrls: List<String>): List<OneTimeWorkRequest> {
+            return videoUrls.map { url ->
+                OneTimeWorkRequestBuilder<VideoPreloadWorker>()
+                    .setInputData(Data.Builder().putString(VIDEO_URL, url).build())
+                    .build()
             }
-            return onetimeNetworkRequestList
         }
     }
 
@@ -66,24 +62,15 @@ class VideoPreloadWorker(
     }
 
     override suspend fun doWork(): Result {
-        val videoUrl = inputData.getString(VIDEO_URLS) ?: return Result.failure()
-        return runCatching {
-            // Launch the caching job in the coroutine context provided by CoroutineWorker
-            videoCachingJob = CoroutineScope(Dispatchers.IO).launch {
-                preCacheVideoWithRetries(videoUrl)
+        val videoUrl = inputData.getString(VIDEO_URL) ?: return Result.failure()
+        return withContext(Dispatchers.IO) {
+            try {
+                val success = preCacheVideoWithRetries(videoUrl)
+                if (success) Result.success() else Result.retry()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error caching video: $videoUrl", e)
+                Result.failure()
             }
-
-            // Wait for the caching job to complete
-            videoCachingJob?.join()
-
-            if (videoCachingJob?.isCompleted == true && !videoCachingJob!!.isCancelled) {
-                Result.success()
-            } else {
-                Result.retry()
-            }
-        }.getOrElse {
-            it.printStackTrace()
-            Result.failure()
         }
     }
 
@@ -107,24 +94,19 @@ class VideoPreloadWorker(
 //    }
 
     private suspend fun preCacheVideoWithRetries(videoUrl: String, attempt: Int = 1): Boolean {
-        val startTime = System.currentTimeMillis()
-        return runCatching {
+        return try {
             if (preCacheVideo(videoUrl)) {
-                Log.d(TAG, "Caching succeeded for $videoUrl in attempt $attempt")
+                Log.d(TAG, "Caching succeeded for $videoUrl")
                 true
             } else throw Exception("Failed to cache video: $videoUrl")
-        }.getOrElse {
+        } catch (e: Exception) {
             if (attempt < MAX_RETRY_ATTEMPTS) {
-                Log.d(TAG, "Retrying $videoUrl after delay (attempt $attempt)")
                 delay(1000L * attempt)
                 preCacheVideoWithRetries(videoUrl, attempt + 1)
             } else {
                 Log.e(TAG, "Max retry attempts reached for $videoUrl")
                 false
             }
-        }.also {
-            val endTime = System.currentTimeMillis()
-            Log.d(TAG, "Total caching time for $videoUrl: ${(endTime - startTime) / 1000} seconds")
         }
     }
 
@@ -132,15 +114,10 @@ class VideoPreloadWorker(
         val uri = Uri.parse(videoUrl)
         return runCatching {
             if (cache.isCached(videoUrl, 0, PRE_CACHE_SIZE.toLong())) {
-                Log.w("precaching", "Already cached for position: : $uri")
+                Log.d(TAG, "Video already cached: $videoUrl")
                 return true
             }
 
-//            val downloader = HlsDownloader(
-//                MediaItem.Builder().setUri(uri).build(),
-//                mCacheDataSource,
-//                executor
-//            )
             val downloader = if (videoUrl.endsWith(".m3u8")) {
                 HlsDownloader(
                     MediaItem.Builder().setUri(uri).build(),
@@ -156,19 +133,24 @@ class VideoPreloadWorker(
             }
 
             var totalBytesDownloaded = 0L
-
             downloader.download { _, bytesDownloaded, _ ->
                 totalBytesDownloaded += bytesDownloaded
                 if (totalBytesDownloaded >= PRE_CACHE_SIZE) {
-                    downloader.cancel()
+                    Log.d(TAG, "Pre-caching reached limit for $videoUrl")
+                    downloader.cancel() // Cancel explicitly after reaching limit
+                    throw CancellationException("Pre-cache limit reached") // Expected behavior
                 }
             }
-            Log.w("precaching", "total network usage: ${totalBytesDownloaded / 1024} KB || Video caching completed for $uri")
+
+            Log.d(TAG, "Video caching completed for $videoUrl")
             true
-        }.onFailure {
-            Log.w("precaching", "Cache fail for position: $uri with exception: $it")
-            it.printStackTrace()
-            false
+        }.onFailure { exception ->
+            if (exception is CancellationException) {
+                Log.d(TAG, "Pre-cache completed with partial data: $videoUrl")
+                true // Treat partial cache as success
+            } else {
+                Log.e(TAG, "Error caching video: $videoUrl", exception)
+            }
         }.getOrElse { false }
     }
 

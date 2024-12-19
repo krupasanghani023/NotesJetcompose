@@ -53,6 +53,26 @@ object Utils {
 //        }
     }
 
+    // Preloading Helper Functions
+//    fun schedulePreloadWork(context: Context, videoUrls: List<String>) {
+//        videoUrls.forEach { url ->
+//            val exoPlayer = ExoPlayer.Builder(context).build()
+//            val mediaItem = MediaItem.fromUri(url)
+//            exoPlayer.setMediaItem(mediaItem)
+//            exoPlayer.prepare()
+//            exoPlayer.release() // Release after preloading
+//        }
+//    }
+
+    fun preloadImages(context: Context, imageUrls: List<String>) {
+        imageUrls.forEach { url ->
+            Glide.with(context)
+                .load(url)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .preload()
+        }
+    }
+
     fun prefetchThumbnailForNextItem(context: Context, item: VideoModel) {
 //   Log.w("development", "prefetchThumbnailForNextItem")
         Glide.with(context).load(item.thumbnailUrl).diskCacheStrategy(DiskCacheStrategy.ALL)
