@@ -92,10 +92,10 @@ dependencies {
     // or Material Design 2
     implementation("androidx.compose.material:material")
     // or skip Material Design and build directly on top of foundational components
-    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.foundation:foundation:1.7.6")
     // or only import the main APIs for the underlying toolkit systems,
     // such as input and measurement/layout
-    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui:1.7.6")
 
     // Android Studio Preview support
     implementation("androidx.compose.ui:ui-tooling-preview")

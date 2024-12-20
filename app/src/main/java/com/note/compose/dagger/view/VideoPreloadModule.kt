@@ -119,7 +119,7 @@ class VideoPreloadModule {
     @Singleton
     fun provideRequestOptions(): RequestOptions {
         return RequestOptions
-            .placeholderOf(R.drawable.ic_plc)
+            .placeholderOf(R.drawable.ic_launcher_foreground)
     }
 
     @Provides
