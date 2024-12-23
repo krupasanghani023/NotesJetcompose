@@ -57,4 +57,5 @@
     <string name="title_activity_demo">DemoActivity</string>
     <string name="title_activity_new_main">NewMainActivity</string>
     <string name="title_activity_instaclone">InstacloneActivity</string>
+    <string name="title_activity_appwrite_demo">AppwriteDemoActivity</string>
 </resources>

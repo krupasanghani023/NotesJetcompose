@@ -170,7 +170,7 @@ dependencies {
     implementation("com.github.skydoves:landscapist-glide:1.3.1")
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
-    implementation ("org.chromium.net:cronet-embedded:119.6045.31")
+            implementation ("org.chromium.net:cronet-embedded:119.6045.31")
     implementation(libs.androidx.media3.datasource.cronet)
 
     implementation ("com.google.android.exoplayer:exoplayer-core:2.19.1") // or latest version
@@ -184,6 +184,11 @@ dependencies {
 
 // Status Bar Color
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
+
+
+    //AppWrite
+
+    implementation("io.appwrite:sdk-for-android:6.0.0")
 
 }
 kapt {
