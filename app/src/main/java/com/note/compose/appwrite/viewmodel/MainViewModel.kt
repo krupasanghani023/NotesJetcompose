@@ -10,8 +10,6 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class MainViewModel (private val database: Databases, private val databaseId: String, private val collectionId: String) : ViewModel() {
-    private val _items = MutableStateFlow<List<RentalData>>(emptyList())
-    val items: StateFlow<List<RentalData>> = _items
 
     private val _currentItem = MutableStateFlow<RentalData?>(null)
     val currentItem: StateFlow<RentalData?> = _currentItem
@@ -30,13 +28,11 @@ class MainViewModel (private val database: Databases, private val databaseId: St
                         id = it.id,
                         name = it.data["Name"] as String,
                         address = it.data["Address"] as String,
-                        rentAmount = (it.data["Rent_amount"] as Number).toDouble(),
-                        advanceAmount = (it.data["Advance_amount"] as Number).toDouble()
+                        rentAmount = (it.data["Rent_amount"] as Long).toInt(),
+                        advanceAmount = (it.data["Advance_amount"] as Long).toInt()
                     )
                 }.sortedByDescending { it.id } // Sort by ID in descending order
                 _state.value = ResultState.Success(documents)
-
-//                _items.value = documents
             } catch (e: Exception) {
                 e.printStackTrace()
                 _state.value = ResultState.Error(e.message ?: "An unknown error occurred")

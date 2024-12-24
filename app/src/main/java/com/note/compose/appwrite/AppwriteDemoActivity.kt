@@ -8,24 +8,26 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -40,8 +42,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +57,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -126,13 +128,13 @@ fun MainScreen(viewModel: MainViewModel) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemListScreen(
     viewModel: MainViewModel,
     onAddItem: () -> Unit,
     onEditItem: (RentalData) -> Unit
 ) {
-//    val items by viewModel.items.collectAsState()
     val state by viewModel.state.collectAsState()
 
     var items by remember { mutableStateOf<List<RentalData>>(emptyList()) }
@@ -196,7 +198,6 @@ fun ItemListScreen(
                                 Font(R.font.crimsonpro_semibold, FontWeight.Normal)
                             ),
                             fontSize = 30.sp,
-//                            color = colorResource(id = R.color.white)
                         ),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -267,21 +268,62 @@ fun ConfirmDeleteDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        title = { Text("Confirm Deletion") },
-        text = { Text("Are you sure you want to delete this item?") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Delete", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.4f)) // Background overlay
+            .clickable { onDismiss() },
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.padding(24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Dialog Title
+                Text(
+                    text = "Confirm Deletion",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Dialog Message
+                Text(
+                    text = "Are you sure you want to delete this item?",
+                    style = TextStyle(
+                        fontSize = 16.sp
+                    ),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Absolute.Right
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    TextButton(
+                        onClick = onConfirm,
+                    ) {
+                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -295,7 +337,7 @@ fun RentItemRow(item: RentalData, onEdit: () -> Unit, onDelete: (String) -> Unit
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                    .padding(top = 8.dp, start = 16.dp, bottom = 3.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -303,29 +345,48 @@ fun RentItemRow(item: RentalData, onEdit: () -> Unit, onDelete: (String) -> Unit
                         fontFamily = FontFamily(
                             Font(R.font.crimsonpro_medium, FontWeight.Normal)
                         ),
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         textAlign = TextAlign.Center
                     ))
-//                    Text("Address: ${item.address}")
-                    Text("${item.rentAmount}$",style = TextStyle(
-                            fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                            ),
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Center
-                    ))
-//                    Text("Advance Amount: ${item.advanceAmount}")
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Card(
+                        modifier = Modifier,
+                        shape = RoundedCornerShape(5.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(Color.LightGray)
+                                .padding(horizontal = 2.dp)
+                        ) {
+                            Text(
+                                "$${item.rentAmount}",
+                                style = TextStyle(
+                                    fontFamily = FontFamily(Font(R.font.crimsonpro_regular, FontWeight.Normal)),
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Center
+                                ),
+                            )
+                        }
+                    }
                 }
+                // Row for Edit and Delete icons with no extra space
                 Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .wrapContentWidth(Alignment.End), // Ensure only necessary space is used
+                    modifier = Modifier.align(Alignment.CenterVertically),
                 ) {
                     IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_edit), // Custom icon from drawable
+                            contentDescription = "Edit",
+                            modifier = Modifier.size(18.dp) // Fixed size for the icon
+                        )
                     }
+
                     IconButton(onClick = { onDelete(item.id) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_delete), // Custom icon from drawable
+                            contentDescription = "Delete",
+                            modifier = Modifier.size(24.dp) // Fixed size for the icon
+                        )
                     }
                 }
             }
@@ -348,6 +409,7 @@ fun AddEditScreen(
     var addressError by remember { mutableStateOf(false) }
     var rentAmountError by remember { mutableStateOf(false) }
     var advanceAmountError by remember { mutableStateOf(false) }
+    var advanceAmountOverError by remember { mutableStateOf(false) }
     Scaffold(
 
         topBar = {
@@ -357,17 +419,17 @@ fun AddEditScreen(
                         containerColor = colorResource(id = R.color.color_07011c),
                         titleContentColor = colorResource(id = R.color.white),
                     ),
-                    title = { Text(if (currentItem == null) "Add Item" else "Edit Item",
+                    title = { Text(
+                        if (currentItem == null) stringResource(id = R.string.add_item) else stringResource(
+                            id = R.string.edit_item
+                        ),
                         style = TextStyle(
                             fontFamily = FontFamily(
                                 Font(R.font.crimsonpro_semibold, FontWeight.Normal)
                             ),
                             fontSize = 30.sp,
-//                            color = colorResource(id = R.color.white)
                         ),
-//                        textAlign = TextAlign.Center,
-//                        modifier = Modifier.fillMaxWidth()
-                                                    )
+                    )
                     },
                     navigationIcon  = {
                         IconButton(onClick =  onCancel ) {
@@ -409,24 +471,29 @@ fun AddEditScreen(
                         name = it
                         nameError = false // Reset error when user starts typing
                     },
-                    label = { Text("Name", color = colorResource(id = R.color.color_07011c)) },
+                    label = { Text(stringResource(id = R.string.name), color = colorResource(id = R.color.color_979797),fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )) },
                     modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+                    textStyle = TextStyle(color = colorResource(id = R.color.black), fontSize = 17.sp,fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     isError = nameError,
                     colors = OutlinedTextFieldDefaults.colors(
                         cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
                         focusedBorderColor = colorResource(id = R.color.color_07011c),
-//                        unfocusedBorderColor = Grey80,
                     )
 
                 )
                 if (nameError) {
                     Text(
-                        text = "Name is required",
+                        text = stringResource(id = R.string.name_is_required),
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        fontFamily = FontFamily(
+                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        )
                     )
                 }
 
@@ -436,17 +503,27 @@ fun AddEditScreen(
                         address = it
                         addressError = false
                     },
-                    label = { Text("Address") },
+                    label = { Text(stringResource(id = R.string.address), color = colorResource(id = R.color.color_979797),fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )) },
                     modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+                    textStyle = TextStyle(color = colorResource(id = R.color.black), fontSize = 17.sp,fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    isError = addressError
+                    isError = addressError,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
+                        focusedBorderColor = colorResource(id = R.color.color_07011c),
+                    )
                 )
                 if (addressError) {
                     Text(
-                        text = "Address is required",
+                        text = stringResource(id = R.string.address_is_required),
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        fontFamily = FontFamily(
+                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        )
                     )
                 }
 
@@ -456,43 +533,82 @@ fun AddEditScreen(
                         rentAmount = it
                         rentAmountError = false
                     },
-                    label = { Text("Rent Amount") },
+                    label = { Text(stringResource(id = R.string.rent_amount), color = colorResource(id = R.color.color_979797),fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )) },
                     modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+                    textStyle = TextStyle(color = colorResource(id = R.color.black), fontSize = 17.sp,fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                    isError = rentAmountError
+                    isError = rentAmountError,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
+                        focusedBorderColor = colorResource(id = R.color.color_07011c),
+                    )
                 )
                 if (rentAmountError) {
                     Text(
-                        text = "Rent amount is required",
+                        text = stringResource(id = R.string.rent_amount_is_required),
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        fontFamily = FontFamily(
+                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        )
                     )
                 }
 
                 OutlinedTextField(
                     value = advanceAmount,
                     onValueChange = {
-                        advanceAmount = it
-                        advanceAmountError = false
+                        val rentValue = rentAmount.toIntOrNull() ?: 0
+                        val advanceValue = it.toIntOrNull() ?: 0
+
+                        if (advanceValue <= rentValue) {
+                            advanceAmount = it
+                            advanceAmountOverError = false
+                        } else {
+                            advanceAmountOverError = true
+                        }
                     },
-                    label = { Text("Advance Amount") },
+                    label = { Text(stringResource(id = R.string.advance_amount), color = colorResource(id = R.color.color_979797), fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )) },
                     modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(brush = brush, fontSize = 17.sp),
+                    textStyle = TextStyle(color = colorResource(id = R.color.black), fontSize = 17.sp, fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                    isError = advanceAmountError
+                    isError = advanceAmountError,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = colorResource(id = R.color.color_07011c),
+                        focusedBorderColor = colorResource(id = R.color.color_07011c),
+                    )
                 )
+                if (advanceAmountOverError) {
+                    Text(
+                        text = stringResource(id = R.string.advance_amount_cannot_exceed_rent_amount),
+                        color = MaterialTheme.colorScheme.error,
+                        fontFamily = FontFamily(
+                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        )
+                    )
+                }
+
                 if (advanceAmountError) {
                     Text(
-                        text = "Advance amount is required",
+                        text = stringResource(id = R.string.advance_amount_is_required),
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        fontFamily = FontFamily(
+                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        )
                     )
                 }
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth().padding(10.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
                 ) {
                     Button(onClick = {
                         // Save the item (add or edit)
@@ -510,8 +626,8 @@ fun AddEditScreen(
                                     id = currentItem?.id ?: "",
                                     name = name,
                                     address = address,
-                                    rentAmount = rentAmount.toDoubleOrNull() ?: 0.0,
-                                    advanceAmount = advanceAmount.toDoubleOrNull() ?: 0.0
+                                    rentAmount = rentAmount.toIntOrNull() ?: 0,
+                                    advanceAmount = advanceAmount.toIntOrNull() ?: 0
                                 )
                             )
                             onSave()
@@ -522,22 +638,17 @@ fun AddEditScreen(
                             contentColor = colorResource(id = R.color.white) // Custom text/icon color
                         )
                     ) {
-                        Text("Save", modifier = Modifier.fillMaxWidth().padding(5.dp), textAlign = TextAlign.Center,
+                        Text(
+                            stringResource(id = R.string.save), modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp), textAlign = TextAlign.Center,
                             style = TextStyle(
                                 fontFamily = FontFamily(
                                     Font(R.font.crimsonpro_semibold, FontWeight.Normal)
                                 ),
                                 fontSize = 28.sp,
-//                            color = colorResource(id = R.color.white)
                             ))
                     }
-//                    Button(onClick = onCancel,
-//                        colors = ButtonDefaults.buttonColors(
-//                            containerColor = colorResource(id = R.color.color_07011c), // Custom background color
-//                            contentColor = colorResource(id = R.color.white) // Custom text/icon color
-//                        )) {
-//                        Text("Cancel")
-//                    }
                 }
             }
 
