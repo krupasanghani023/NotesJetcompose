@@ -189,6 +189,7 @@ dependencies {
     //AppWrite
 
     implementation("io.appwrite:sdk-for-android:6.0.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
 }
 kapt {

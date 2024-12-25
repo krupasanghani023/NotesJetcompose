@@ -72,7 +72,7 @@ import androidx.core.view.WindowCompat
 import com.note.compose.R
 import com.note.compose.appwrite.model.RentalData
 import com.note.compose.appwrite.ui.theme.ComposeTheme
-import com.note.compose.appwrite.util.collectionId
+import com.note.compose.appwrite.util.Property_Id
 import com.note.compose.appwrite.util.databaseId
 import com.note.compose.appwrite.viewmodel.MainViewModel
 import com.note.compose.appwrite.viewmodel.ResultState
@@ -91,42 +91,42 @@ class AppwriteDemoActivity : ComponentActivity() {
         val viewModel = MainViewModel(
             database = database,
             databaseId = databaseId,
-            collectionId = collectionId
+            collectionId = Property_Id
         )
 
         setContent {
             ComposeTheme {
-                MainScreen(viewModel=viewModel)
+//                MainScreen(viewModel=viewModel)
             }
 
         }
     }
 }
-@Composable
-fun MainScreen(viewModel: MainViewModel) {
-    var showAddEditScreen by remember { mutableStateOf(false) }
-
-
-    if (showAddEditScreen) {
-        AddEditScreen(
-            viewModel = viewModel,
-            onSave = { showAddEditScreen = false },
-            onCancel = { showAddEditScreen = false }
-        )
-    } else {
-        ItemListScreen(
-            viewModel = viewModel,
-            onAddItem = {
-                viewModel.setCurrentItem(null)
-                showAddEditScreen = true
-            },
-            onEditItem = {
-                viewModel.setCurrentItem(it)
-                showAddEditScreen = true
-            }
-        )
-    }
-}
+//@Composable
+//fun MainScreen(viewModel: MainViewModel) {
+//    var showAddEditScreen by remember { mutableStateOf(false) }
+//
+//
+//    if (showAddEditScreen) {
+//        AddEditScreen(
+//            viewModel = viewModel,
+//            onSave = { showAddEditScreen = false },
+//            onCancel = { showAddEditScreen = false }
+//        )
+//    } else {
+//        ItemListScreen(
+//            viewModel = viewModel,
+//            onAddItem = {
+//                viewModel.setCurrentItem(null)
+//                showAddEditScreen = true
+//            },
+//            onEditItem = {
+//                viewModel.setCurrentItem(it)
+//                showAddEditScreen = true
+//            }
+//        )
+//    }
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

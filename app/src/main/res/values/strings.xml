@@ -69,5 +69,6 @@
     <string name="advance_amount">Advance Amount</string>
     <string name="advance_amount_is_required">Advance amount is required</string>
     <string name="advance_amount_cannot_exceed_rent_amount">Advance amount cannot exceed rent amount</string>
+    <string name="title_activity_tenants">TenantsActivity</string>
 
 </resources>
