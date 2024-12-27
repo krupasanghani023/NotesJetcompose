@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -52,7 +51,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,7 +63,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -89,9 +86,11 @@ import com.note.compose.appwrite.model.RentalData
 import com.note.compose.appwrite.ui.theme.ComposeTheme
 import com.note.compose.appwrite.util.AddEditTenantScreen
 import com.note.compose.appwrite.util.Property_Id
+import com.note.compose.appwrite.util.RentalFormUI
 import com.note.compose.appwrite.util.TenantListScreen
 import com.note.compose.appwrite.util.Tenants_Id
 import com.note.compose.appwrite.util.databaseId
+import com.note.compose.appwrite.viewmodel.AllocatedViewModel
 import com.note.compose.appwrite.viewmodel.MainViewModel
 import com.note.compose.appwrite.viewmodel.ResultState
 import com.note.compose.appwrite.viewmodel.TenantsViewModel
@@ -114,11 +113,15 @@ class TenantsActivity : ComponentActivity() {
             databaseId = databaseId,
             collectionId = Property_Id
         )
+        val allocatedViewModel=AllocatedViewModel(
+            database = database,
+            databaseId = databaseId)
         setContent {
             ComposeTheme {
                 MainScreen(
                     propertyViewModel = propertyViewModel,
-                    tenantsViewModel = tenantsViewModel
+                    tenantsViewModel = tenantsViewModel,
+                    allocatedViewModel=allocatedViewModel
                 )
             }
         }
@@ -127,7 +130,8 @@ class TenantsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewModel) {
+fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewModel,
+               allocatedViewModel: AllocatedViewModel) {
     val navController = rememberNavController()
     val selectedTab = remember { mutableStateOf("Property") }
     var showTenantOptions by remember { mutableStateOf(false) }
@@ -162,7 +166,7 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                                 }
                             }
 
-                            "add_edit_allocation" -> "Edit Allocation"
+                            "add_edit_allocation" -> "Allocation"
                             else -> if (selectedTab.value == "Property") "Property List" else "Tenants List"
                         },
                         style = TextStyle(
@@ -306,7 +310,10 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                 composable("add_edit_allocation") {
                     AddEditAllocationScreen(
                         onSave = { navController.popBackStack() },
-                        onCancel = { navController.popBackStack() }
+                        onCancel = { navController.popBackStack() },
+                        propertyViewModel = propertyViewModel,
+                        tenantsViewModel=tenantsViewModel,
+                        allocatedViewModel=allocatedViewModel
                     )
                 }
             }
@@ -346,6 +353,7 @@ fun PropertyListScreen(
     viewModel: MainViewModel,
     onEditItem: (RentalData) -> Unit,
 ) {
+
     val state by viewModel.state.collectAsState()
 
     var items by remember { mutableStateOf<List<RentalData>>(emptyList()) }
@@ -726,12 +734,17 @@ fun AddEditPropertyScreen(onSave: () -> Unit, viewModel: MainViewModel) {
 
 
 @Composable
-fun AddEditAllocationScreen(onSave: () -> Unit, onCancel: () -> Unit) {
-    Column {
-        Text("Add/Edit Allocation Screen")
-        Button(onClick = onSave) { Text("Save") }
-        Button(onClick = onCancel) { Text("Cancel") }
-    }
+fun AddEditAllocationScreen(onSave: () -> Unit,
+                            onCancel: () -> Unit,
+                            propertyViewModel: MainViewModel,
+                            tenantsViewModel: TenantsViewModel,
+                            allocatedViewModel: AllocatedViewModel) {
+    RentalFormUI(
+        onSave = onSave,
+        onCancel = onCancel,
+        propertyViewModel = propertyViewModel,
+        tenantsViewModel=tenantsViewModel,
+    allocatedViewModel=allocatedViewModel)
 }
 
 @Composable
@@ -787,6 +800,6 @@ fun TenantOptionsMenu(
 @Composable
 fun GreetingPreview() {
     ComposeTheme {
-        MainScreen(viewModel(), viewModel())
+        MainScreen(viewModel(), viewModel(), viewModel())
     }
 }

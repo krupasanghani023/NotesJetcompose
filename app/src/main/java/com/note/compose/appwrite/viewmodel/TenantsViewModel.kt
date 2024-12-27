@@ -29,6 +29,9 @@ class TenantsViewModel(private val database: Databases, private val databaseId: 
                         name = it.data["Tenanas_name"] as String ,
                         address = it.data["Tenants_Address"] as String ,
                         phoneNumber = it.data["Tenants_Phone"] as String ,
+                        allocatedPropertyId = it.data["Allocated_PropertyId"] as? String?:null ,
+                        startDate = it.data["Start_Date"] as? String?:null ,
+                        endDate = it.data["End_Date"] as? String?:null ,
                     )
                 }.sortedByDescending { it.id } // Sort by ID in descending order
                 _state.value = ResultState.Success(documents)

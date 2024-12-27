@@ -264,6 +264,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
     var nameError by remember { mutableStateOf(false) }
     var addressError by remember { mutableStateOf(false) }
     var phoneNumberError by remember { mutableStateOf(false) }
+    var incorrectphoneNumberError by remember { mutableStateOf(false) }
     Scaffold(
 
     ) { innerPadding ->
@@ -380,7 +381,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                     },
                     label = {
                         Text(
-                            stringResource(id = R.string.rent_amount),
+                            stringResource(id = R.string.contact),
                             color = colorResource(id = R.color.color_979797),
                             fontFamily = FontFamily(
                                 Font(R.font.crimsonpro_regular, FontWeight.Normal)
@@ -405,15 +406,24 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                         focusedBorderColor = colorResource(id = R.color.color_07011c),
                     )
                 )
-                if (phoneNumberError) {
+                if (incorrectphoneNumberError) {
                     Text(
-                        text = stringResource(id = R.string.rent_amount_is_required),
+                        text = stringResource(id = R.string.invalid_phone_nuber),
                         color = MaterialTheme.colorScheme.error,
                         fontFamily = FontFamily(
                             Font(R.font.crimsonpro_regular, FontWeight.Normal)
                         )
                     )
                 }
+//                if (phoneNumberError) {
+//                    Text(
+//                        text = stringResource(id = R.string.phone_number_is_required),
+//                        color = MaterialTheme.colorScheme.error,
+//                        fontFamily = FontFamily(
+//                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+//                        )
+//                    )
+//                }
 
 
                 Row(
@@ -428,10 +438,14 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                             // Validate inputs
                             nameError = name.isBlank()
                             addressError = address.isBlank()
+//                            phoneNumberError = phoneNumber.isBlank()
+
                             phoneNumberError = phoneNumber.isBlank()
+                            incorrectphoneNumberError=!phoneNumber.matches(Regex("^[0-9]{10}$"))
+
 
                             // If no errors, save the data
-                            if (!nameError && !addressError && !phoneNumberError) {
+                            if (!nameError && !addressError && !phoneNumberError && !incorrectphoneNumberError) {
 
                                 tenantsViewModel.saveItem(
                                     TenantsData(

@@ -66,6 +66,9 @@
     <string name="address_is_required">Address is required</string>
     <string name="rent_amount">Rent Amount</string>
     <string name="rent_amount_is_required">Rent amount is required</string>
+    <string name="phone_number_is_required">Phone Number  is required</string>
+    <string name="invalid_phone_nuber">Invalid Phone Number</string>
+    <string name="contact">Contact</string>
     <string name="advance_amount">Advance Amount</string>
     <string name="advance_amount_is_required">Advance amount is required</string>
     <string name="advance_amount_cannot_exceed_rent_amount">Advance amount cannot exceed rent amount</string>
