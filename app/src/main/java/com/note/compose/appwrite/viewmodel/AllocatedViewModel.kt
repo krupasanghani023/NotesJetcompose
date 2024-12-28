@@ -29,7 +29,8 @@ class AllocatedViewModel(private val database: Databases, private val databaseId
                     "Start_Date" to (property.startDate ?: ""),
                     "End_Date" to (property.endDate ?: ""),
                     "Is_Allocated" to property.isAllocated,
-                    "Allocated_TenantId" to property.allocatedTenantId
+                    "Allocated_TenantId" to property.allocatedTenantId,
+                    "Tenants_Name" to property.allocatedTenantName
                 )
 
                 // If property has an existing ID, update it

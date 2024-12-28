@@ -34,6 +34,7 @@ class MainViewModel (private val database: Databases, private val databaseId: St
                         endDate=it.data["End_Date"] as? String?:null,
                         isAllocated=it.data["Is_Allocated"] as? Boolean?:false,
                         allocatedTenantId=it.data["Allocated_TenantId"] as? String?:null,
+                        allocatedTenantName =it.data["Tenants_Name"] as? String?:null,
                     )
                 }.sortedByDescending { it.id } // Sort by ID in descending order
                 _state.value = ResultState.Success(documents)

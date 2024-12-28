@@ -84,9 +84,9 @@ import androidx.navigation.compose.rememberNavController
 import com.note.compose.R
 import com.note.compose.appwrite.model.RentalData
 import com.note.compose.appwrite.ui.theme.ComposeTheme
+import com.note.compose.appwrite.util.AddEditAllocationScreen
 import com.note.compose.appwrite.util.AddEditTenantScreen
 import com.note.compose.appwrite.util.Property_Id
-import com.note.compose.appwrite.util.RentalFormUI
 import com.note.compose.appwrite.util.TenantListScreen
 import com.note.compose.appwrite.util.Tenants_Id
 import com.note.compose.appwrite.util.databaseId
@@ -138,7 +138,14 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
     val currentPropertyItem by propertyViewModel.currentItem.collectAsState()
     val currentTenantItem by tenantsViewModel.currentItem.collectAsState()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
+    // Update selected tab based on current route
+    LaunchedEffect(currentRoute) {
+        selectedTab.value = when (currentRoute) {
+            "property_list" -> "Property"
+            "tenant_list" -> "Tenants"
+            else -> "Property" // Default to Property tab
+        }
+    }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -230,14 +237,10 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
             }
         },
         floatingActionButtonPosition = FabPosition.Center,
+
         bottomBar = {
             // Hide bottom navigation when on Add/Edit screens
-            if (currentRoute !in listOf(
-                    "add_edit_property",
-                    "add_edit_tenant",
-                    "add_edit_allocation"
-                )
-            ) {
+            if (currentRoute !in listOf("add_edit_property", "add_edit_tenant", "add_edit_allocation")) {
                 BottomNavigation(
                     backgroundColor = Color.White,
                     modifier = Modifier
@@ -262,7 +265,10 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                                 contentDescription = "Property"
                             )
                         },
-                        label = { Text("Property") }
+                        label = { Text("Property") },
+                        selectedContentColor = colorResource(id = R.color.color_07011c), // Custom selected color
+                        unselectedContentColor = colorResource(id = R.color.gray_600), // Custom unselected color
+                        alwaysShowLabel = true
                     )
                     BottomNavigationItem(
                         selected = selectedTab.value == "Tenants",
@@ -278,7 +284,10 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                                 contentDescription = "Tenants"
                             )
                         },
-                        label = { Text("Tenants") }
+                        label = { Text("Tenants") },
+                        selectedContentColor = colorResource(id = R.color.color_07011c), // Custom selected color
+                        unselectedContentColor = colorResource(id = R.color.gray_600), // Custom unselected color
+                        alwaysShowLabel = true
                     )
                 }
             }
@@ -310,7 +319,6 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                 composable("add_edit_allocation") {
                     AddEditAllocationScreen(
                         onSave = { navController.popBackStack() },
-                        onCancel = { navController.popBackStack() },
                         propertyViewModel = propertyViewModel,
                         tenantsViewModel=tenantsViewModel,
                         allocatedViewModel=allocatedViewModel
@@ -399,7 +407,7 @@ fun PropertyListScreen(
             .fillMaxSize()
             .padding(5.dp)
     ) {
-        if (items.isEmpty()) {
+        if (items.isNullOrEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -730,21 +738,6 @@ fun AddEditPropertyScreen(onSave: () -> Unit, viewModel: MainViewModel) {
 
         }
     }
-}
-
-
-@Composable
-fun AddEditAllocationScreen(onSave: () -> Unit,
-                            onCancel: () -> Unit,
-                            propertyViewModel: MainViewModel,
-                            tenantsViewModel: TenantsViewModel,
-                            allocatedViewModel: AllocatedViewModel) {
-    RentalFormUI(
-        onSave = onSave,
-        onCancel = onCancel,
-        propertyViewModel = propertyViewModel,
-        tenantsViewModel=tenantsViewModel,
-    allocatedViewModel=allocatedViewModel)
 }
 
 @Composable

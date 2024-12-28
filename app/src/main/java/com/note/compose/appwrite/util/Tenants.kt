@@ -166,8 +166,6 @@ fun TenantsListScreen(
 
 @Composable
 fun TenantListScreen(navController: NavController, tenantsViewModel: TenantsViewModel) {
-    // TODO: Display list of tenants
-//    Text("Tenant List Screen")
     TenantsListScreen(
         viewModel = tenantsViewModel,
         onEditItem = {

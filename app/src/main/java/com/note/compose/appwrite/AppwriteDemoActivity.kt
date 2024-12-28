@@ -113,7 +113,7 @@ fun RentItemRow(item: RentalData, onEdit: () -> Unit, onDelete: (String) -> Unit
                 .padding(vertical = 8.dp)
                 .border(
                     width = if (item.isAllocated) 1.dp else 0.dp,
-                    color = if (item.isAllocated) colorResource(id = R.color.gray_400) else Color.Transparent,
+                    color = if (item.isAllocated) colorResource(id = R.color.color_C6FDB8) else Color.Transparent,
                     shape = RoundedCornerShape(8.dp)
                 )
 

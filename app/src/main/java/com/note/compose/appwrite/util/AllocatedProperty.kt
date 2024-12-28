@@ -3,24 +3,21 @@ package com.note.compose.appwrite.util
 import android.app.DatePickerDialog
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
@@ -29,8 +26,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,9 +59,8 @@ import com.note.compose.appwrite.viewmodel.TenantsViewModel
 import java.util.Calendar
 
 @Composable
-fun RentalFormUI(
+fun AddEditAllocationScreen(
     onSave: () -> Unit,
-    onCancel: () -> Unit,
     propertyViewModel: MainViewModel,
     tenantsViewModel: TenantsViewModel,
     allocatedViewModel: AllocatedViewModel,
@@ -73,7 +70,7 @@ fun RentalFormUI(
     val tenantsState by tenantsViewModel.state.collectAsState()
     var items by remember { mutableStateOf<List<RentalData>>(emptyList()) }
     var tenants by remember { mutableStateOf<List<TenantsData>>(emptyList()) }
-    var notAllocatedProperty by remember { mutableStateOf<List<String>>(emptyList()) }
+    var propertys by remember { mutableStateOf<List<String>>(emptyList()) }
     var tenantsList by remember { mutableStateOf<List<String>>(emptyList()) }
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -85,22 +82,20 @@ fun RentalFormUI(
         is ResultState.Loading -> {
             Box(
                 modifier = Modifier
-                    .fillMaxSize() // Take full screen space
+                    .fillMaxSize()
             ) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center), // Center the indicator
-                    color = MaterialTheme.colorScheme.primary, // Use theme color or custom color
-                    strokeWidth = 4.dp // Optional: Adjust stroke width
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 4.dp
                 )
             }
         }
 
         is ResultState.Success -> {
             items = (propertystate as ResultState.Success<List<RentalData>>).data
-            notAllocatedProperty =
-                items.map { it.name } // Extract property names
-//            notAllocatedProperty =
-//                items.filter { !it.isAllocated }.map { it.name } // Extract property names
+            propertys =
+                items.map { it.name }
         }
 
         is ResultState.Error -> {
@@ -115,16 +110,16 @@ fun RentalFormUI(
                     .fillMaxSize() // Take full screen space
             ) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center), // Center the indicator
-                    color = MaterialTheme.colorScheme.primary, // Use theme color or custom color
-                    strokeWidth = 4.dp // Optional: Adjust stroke width
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 4.dp
                 )
             }
         }
 
         is ResultState.Success -> {
             tenants = (tenantsState as ResultState.Success<List<TenantsData>>).data
-            tenantsList = tenants.map { it.name } // Extract property names
+            tenantsList = tenants.map { it.name }
         }
 
         is ResultState.Error -> {
@@ -148,31 +143,26 @@ fun RentalFormUI(
     var tenantPhone by remember { mutableStateOf("") }
     var tenantAddress by remember { mutableStateOf("") }
 
-    // Update UI when selectedProperty changes
     LaunchedEffect(selectedProperty) {
-        // Find the selected property by name
         val property = items.find { it.name == selectedProperty }
 
-        // If property is found, update fields
         property?.let {
             id = it.id
             rent = it.rentAmount.toString()
             advance = it.advanceAmount.toString()
+            selectedTenant = if(it.allocatedTenantName.isNullOrEmpty()){""}else it.allocatedTenantName.toString()
             isFreeAllocate = it.isAllocated
             if (!it.startDate.isNullOrEmpty()) {
                 startDate = it.startDate.toString()
             }
             if (!it.endDate.isNullOrEmpty()) {
-                startDate = it.endDate.toString()
+                endDate = it.endDate.toString()
             }
         }
     }
 
     LaunchedEffect(selectedTenant) {
-        // Find the selected property by name
         val property = tenants.find { it.name == selectedTenant }
-
-        // If property is found, update fields
         property?.let {
             tenantId = it.id
             tenantName = it.name
@@ -189,23 +179,47 @@ fun RentalFormUI(
 
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Selected Tenant Dropdown
-        DropdownMenuField(
-            label = "Selected Tenant",
-            options = tenantsList,
-            selectedOption = selectedTenant,
-            onOptionSelected = { selectedTenant = it }
-        )
 
         // Selected Property Dropdown
         DropdownMenuField(
             label = "Selected Property",
-            options = notAllocatedProperty,
+            options = propertys,
             selectedOption = selectedProperty,
             onOptionSelected = { selectedProperty = it }
         )
+        if (!isFreeAllocate) {
+            DropdownMenuField(
+                label = "Selected Tenant",
+                options = tenantsList,
+                selectedOption =selectedTenant,
+                onOptionSelected = {selectedTenant = it }
+            )
+        } else {
+            OutlinedTextField(
+                value = if (!selectedTenant.isNullOrEmpty()) selectedTenant else "No Tenant Allocated",
+                onValueChange = {},
+                label = { Text(text = "Allocated Tenant", color = colorResource(id = R.color.color_979797),
+                    fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )) },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                textStyle = TextStyle(
+                    color = colorResource(id = R.color.black),
+                    fontSize = 17.sp,
+                    fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )
+                ),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    disabledBorderColor = colorResource(id = R.color.color_838383),
+                    disabledTextColor = colorResource(id = R.color.black),
+                    disabledLabelColor = colorResource(id = R.color.color_838383)
+                ),
+                enabled = false
+            )
+        }
 
-        // Rent Input Field
         OutlinedTextField(
             value = rent,
             onValueChange = { rent = it },
@@ -220,7 +234,6 @@ fun RentalFormUI(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Advance Input Field
         OutlinedTextField(
             value = advance,
             onValueChange = { advance = it },
@@ -234,59 +247,59 @@ fun RentalFormUI(
             },
             modifier = Modifier.fillMaxWidth()
         )
-
-//        // Free/Allocate Switch
-        Box(
+        Row(
             modifier = Modifier
-                .border(
-                    width = 1.dp, // Outline width
-                    color = colorResource(id = R.color.color_838383), // Outline color changes based on state
-                    shape = RoundedCornerShape(6.dp) // Optional: Rounded corners for outline
-                )
-                .padding(2.dp) // Padding to create space between outline and switch
+                .fillMaxWidth()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 13.dp, top = 2.dp, bottom = 2.dp)
-            ) {
-
-                Text(
-                    text = "Free / Allocate",
-                    color = if (isFreeAllocate) colorResource(id = R.color.black) else colorResource(
-                        id = R.color.color_979797
-                    ),
+            OutlinedTextField(
+                value = if (isFreeAllocate) "Allocate" else "Free",
+                onValueChange = {},
+                label = { Text(text = "Status", color = colorResource(id = R.color.color_979797),
+                    fontFamily = FontFamily(
+                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    )) },
+                trailingIcon = {
+                    Checkbox(
+                        checked = isFreeAllocate,
+                        onCheckedChange = { isFreeAllocate = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color.Black,
+                            uncheckedColor = Color.Gray
+                        )
+                    )
+                },
+                readOnly = true, // Make the field read-only
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(
+                    color = colorResource(id = R.color.black),
+                    fontSize = 17.sp,
                     fontFamily = FontFamily(
                         Font(R.font.crimsonpro_regular, FontWeight.Normal)
                     )
+                ),
+                // Customizing the border color directly
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.Blue,
+                    unfocusedBorderColor = Color.Gray,
+                    focusedLabelColor = Color.Blue,
+                    unfocusedLabelColor = Color.Gray
                 )
-                Spacer(modifier = Modifier.weight(1f))
-
-                Switch(
-                    checked = isFreeAllocate,
-                    onCheckedChange = { isFreeAllocate = it },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.Black, // Thumb color when ON
-                        checkedTrackColor = Color.Black, // Track color when ON
-                        uncheckedThumbColor = Color.Gray, // Thumb color when OFF
-                        uncheckedTrackColor = Color.LightGray // Track color when OFF
-                    )
-                )
-            }
+            )
         }
 
-
-        DatePickerWithInput(
-            label = "Start Date",
-            selectedDate = startDate,
-            onDateSelected = { startDate = it },
-        )
-        DatePickerWithInput(
-            label = "End Date",
-            selectedDate = endDate,
-            onDateSelected = { endDate = it }
-        )
+        if (isFreeAllocate) {
+            DatePickerWithInput(
+                label = "Start Date",
+                selectedDate = startDate,
+                onDateSelected = { startDate = it },
+            )
+        }else {
+            DatePickerWithInput(
+                label = "End Date",
+                selectedDate = endDate,
+                onDateSelected = { endDate = it }
+            )
+        }
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -296,10 +309,44 @@ fun RentalFormUI(
         ) {
             Button(
                 onClick = {
+
+                    // Validation: Check if any required field is empty
+                    if (selectedTenant.isEmpty() || selectedProperty.isBlank()) {
+                        Toast.makeText(
+                            context,
+                            "Please fill in all the required fields",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@Button
+                    }
+
+                    // Validation: Ensure startDate and endDate are provided based on the allocation state
+                    if (isFreeAllocate && startDate.isBlank()) {
+                        Toast.makeText(
+                            context,
+                            "Start Date is required when allocating",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@Button
+                    }
+                    if (!isFreeAllocate && endDate.isBlank()) {
+                        Toast.makeText(
+                            context,
+                            "End Date is required when freeing",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@Button
+                    }
                     // Saving data
                     val selectedTenantsData = tenants.find { it.name == selectedTenant }
                     val selectedPropertyData = items.find { it.name == selectedProperty }
                     selectedPropertyData?.let { property ->
+                        if (isFreeAllocate) {
+                            endDate = ""
+                        } else {
+                            startDate = ""
+                        }
+
                         val tenant = TenantsData(
                             id = tenantId,
                             name = tenantName,
@@ -317,8 +364,9 @@ fun RentalFormUI(
                                 advanceAmount = advance.toInt(),
                                 startDate = startDate,
                                 endDate = endDate,
-                                isAllocated = !isFreeAllocate,
-                                allocatedTenantId = if (!isFreeAllocate) tenant.id else null
+                                isAllocated = isFreeAllocate,
+                                allocatedTenantId = if (!isFreeAllocate) tenantId else null,
+                                allocatedTenantName = if(isFreeAllocate)tenantName else null
                             ),
                             tenant = tenant,
                             onSuccess = {
@@ -328,6 +376,14 @@ fun RentalFormUI(
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 onSave() // Trigger any additional UI update or navigation
+                                tenantId=""
+                                tenantName=""
+                                tenantAddress=""
+                                startDate=""
+                                endDate=""
+                                id=""
+                                rent=""
+                                advance=""
                             },
                             onError = { error ->
                                 Toast.makeText(
@@ -340,14 +396,13 @@ fun RentalFormUI(
                             }
                         )
                     }
-
 //                        onSave()
-
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(id = R.color.color_07011c), // Custom background color
                     contentColor = colorResource(id = R.color.white) // Custom text/icon color
-                )
+                ),
+
             ) {
                 Text(
                     stringResource(id = R.string.save), modifier = Modifier
@@ -471,7 +526,6 @@ fun DropdownMenuField(
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
-//                .menuAnchor()
                 .fillMaxWidth()
         )
 
