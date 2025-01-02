@@ -25,5 +25,9 @@
     <color name="color_1A202020">#B3353535</color>
     <color name="color_FFFFFF00">#FFFFFF00</color>
     <color name="color_FFFF0000">#FFFF0000</color>
-    <color name="color_07011c">#2A2A2B</color>
+<!--    <color name="color_07011c">#2A2A2B</color>-->
+    <color name="color_F9CAAB">#F9CAAB</color>
+    <color name="color_926C57">#926C57</color>
+    <color name="color_196B5A">#196B5A</color>
+    <color name="color_E6D7C3">#F6EEEB</color>
 </resources>

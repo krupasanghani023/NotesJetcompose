@@ -4,16 +4,19 @@ import android.app.Activity
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -74,6 +78,7 @@ fun TenantsListScreen(
     var itemToDelete by remember { mutableStateOf<String?>(null) }
     val view = LocalView.current
     val window = (view.context as Activity).window
+    var showProgressIndicator by remember { mutableStateOf(false) }
 
     WindowCompat.getInsetsController(window, view)?.isAppearanceLightStatusBars = false
 
@@ -90,7 +95,7 @@ fun TenantsListScreen(
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center), // Center the indicator
-                    color = MaterialTheme.colorScheme.primary, // Use theme color or custom color
+                    color = colorResource(id = R.color.color_926C57), // Use theme color or custom color
                     strokeWidth = 4.dp // Optional: Adjust stroke width
                 )
             }
@@ -104,7 +109,7 @@ fun TenantsListScreen(
         is ResultState.Error -> {
             val error = (state as ResultState.Error).message
             Toast.makeText(LocalContext.current, error, Toast.LENGTH_SHORT).show()
-            Log.d("MyTesting", "error:--$error")
+           showDeleteDialog=false
         }
     }
 
@@ -121,9 +126,9 @@ fun TenantsListScreen(
                     "No Tenants Yet!",
                     style = TextStyle(
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_semibold, FontWeight.Normal)
+                            Font(R.font.karla_medium)
                         ),
-                        fontSize = 28.sp,
+                        fontSize = 25.sp,
                         textAlign = TextAlign.Center
                     ),
                     textAlign = TextAlign.Center,
@@ -160,6 +165,13 @@ fun TenantsListScreen(
                 onDismiss = { showDeleteDialog = false }
             )
         }
+        if(showProgressIndicator) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center), // Center the indicator
+                color = colorResource(id = R.color.color_926C57), // Use theme color or custom color
+                strokeWidth = 4.dp // Optional: Adjust stroke width
+            )
+        }
     }
 
 }
@@ -178,72 +190,97 @@ fun TenantListScreen(navController: NavController, tenantsViewModel: TenantsView
 
 @Composable
 fun TenantsItemRow(item: TenantsData, onEdit: () -> Unit, onDelete: (String) -> Unit) {
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+    Box(modifier = Modifier
+        .padding(vertical = 8.dp)
+        .background(color = colorResource(id = R.color.white))
+        .clickable { onEdit() }
     ) {
-        Row(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, start = 16.dp, bottom = 3.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .background(colorResource(id = R.color.white)),
+            shape = RoundedCornerShape(8.dp),
+            elevation = CardDefaults.cardElevation(10.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "${item.name}", style = TextStyle(
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_medium, FontWeight.Normal)
-                        ),
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Center
-                    )
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Card(
-                    modifier = Modifier,
-                    shape = RoundedCornerShape(5.dp),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .background(Color.LightGray)
-                            .padding(horizontal = 2.dp)
-                    ) {
-                        Text(
-                            "${item.phoneNumber}",
-                            style = TextStyle(
-                                fontFamily = FontFamily(
-                                    Font(
-                                        R.font.crimsonpro_regular,
-                                        FontWeight.Normal
-                                    )
-                                ),
-                                fontSize = 16.sp,
-                                textAlign = TextAlign.Center
-                            ),
-                        )
-                    }
-                }
-            }
-            // Row for Edit and Delete icons with no extra space
-            Row(
-                modifier = Modifier.align(Alignment.CenterVertically),
-            ) {
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_edit), // Custom icon from drawable
-                        contentDescription = "Edit",
-                        modifier = Modifier.size(18.dp) // Fixed size for the icon
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .background(color = colorResource(id = R.color.white))
 
-                IconButton(onClick = { onDelete(item.id) }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete), // Custom icon from drawable
-                        contentDescription = "Delete",
-                        modifier = Modifier.size(24.dp) // Fixed size for the icon
-                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, start = 16.dp, bottom = 3.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "${item.name}", style = TextStyle(
+                                fontFamily = FontFamily(
+                                    Font(R.font.karla_semi_bold)
+                                ),
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                       
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 2.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically, // Align the icon and text vertically centered
+                                    horizontalArrangement = Arrangement.Start // Align them to the start (left side)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_phone_call), // Replace with your phone icon
+                                        contentDescription = "Phone Icon",
+                                        modifier = Modifier.size(15.dp), // Adjust the icon size
+                                        tint = colorResource(id = R.color.color_00ACC1) // Set the icon color
+                                    )
+
+                                    Spacer(modifier = Modifier.width(4.dp)) // Add some space between the icon and the text
+
+                                    Text(
+                                        text = "${item.phoneNumber}",
+                                        style = TextStyle(
+                                            fontFamily = FontFamily(Font(R.font.karla_regular)),
+                                            fontSize = 14.sp,
+                                            textAlign = TextAlign.Start, // Align text to the left
+                                            color = colorResource(id = R.color.color_00ACC1)
+                                        ),
+                                    )
+                                }
+                            }
+                        
+                    }
+                    // Row for Edit and Delete icons with no extra space
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Top)
+                            .padding(5.dp),
+                    ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_edit_squre), // Custom icon from drawable
+                                tint = colorResource(id = R.color.color_196B5A),
+                                contentDescription = "Edit",
+                                modifier = Modifier
+                                    .size(18.dp) // Fixed size for the icon
+                                    .clickable { onEdit() }
+                            )
+                        Spacer(modifier = Modifier.height(8.dp)) // Add some space between the icon and the text
+                         Icon(
+                                painter = painterResource(id = R.drawable.ic_delete_round), // Custom icon from drawable
+                                tint = colorResource(id = R.color.color_B50202),
+                                contentDescription = "Delete",
+                                modifier = Modifier
+                                    .size(18.dp) // Fixed size for the icon
+                                    .clickable { onDelete(item.id) }
+                            )
+                    }
                 }
             }
         }
@@ -263,32 +300,13 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
     var addressError by remember { mutableStateOf(false) }
     var phoneNumberError by remember { mutableStateOf(false) }
     var incorrectphoneNumberError by remember { mutableStateOf(false) }
-    Scaffold(
-
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(10.dp),
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                val rainbowColors: List<Color> = listOf(
-                    colorResource(id = R.color.color_D81B60), colorResource(
-                        id = R.color.color_5E35B1
-                    ), colorResource(id = R.color.color_00ACC1)
-                )
-                val brush = remember {
-                    Brush.linearGradient(
-                        colors = rainbowColors
-                    )
-                }
                 OutlinedTextField(
                     value = name,
                     onValueChange = {
@@ -300,7 +318,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                             stringResource(id = R.string.name),
                             color = colorResource(id = R.color.color_979797),
                             fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                                Font(R.font.karla_regular)
                             )
                         )
                     },
@@ -309,15 +327,15 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                         color = colorResource(id = R.color.black),
                         fontSize = 17.sp,
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                            Font(R.font.karla_regular)
                         )
                     ),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     isError = nameError,
                     colors = OutlinedTextFieldDefaults.colors(
-                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
-                        focusedBorderColor = colorResource(id = R.color.color_07011c),
+                        cursorColor = colorResource(id = R.color.color_926C57), // Set cursor color here
+                        focusedBorderColor = colorResource(id = R.color.color_926C57),
                     )
 
                 )
@@ -326,7 +344,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                         text = stringResource(id = R.string.name_is_required),
                         color = MaterialTheme.colorScheme.error,
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                            Font(R.font.karla_regular)
                         )
                     )
                 }
@@ -342,7 +360,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                             stringResource(id = R.string.address),
                             color = colorResource(id = R.color.color_979797),
                             fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                                Font(R.font.karla_regular)
                             )
                         )
                     },
@@ -351,14 +369,14 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                         color = colorResource(id = R.color.black),
                         fontSize = 17.sp,
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                            Font(R.font.karla_regular)
                         )
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     isError = addressError,
                     colors = OutlinedTextFieldDefaults.colors(
-                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
-                        focusedBorderColor = colorResource(id = R.color.color_07011c),
+                        cursorColor = colorResource(id = R.color.color_926C57), // Set cursor color here
+                        focusedBorderColor = colorResource(id = R.color.color_926C57),
                     )
                 )
                 if (addressError) {
@@ -366,7 +384,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                         text = stringResource(id = R.string.address_is_required),
                         color = MaterialTheme.colorScheme.error,
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                            Font(R.font.karla_regular)
                         )
                     )
                 }
@@ -382,7 +400,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                             stringResource(id = R.string.contact),
                             color = colorResource(id = R.color.color_979797),
                             fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                                Font(R.font.karla_regular)
                             )
                         )
                     },
@@ -391,17 +409,17 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                         color = colorResource(id = R.color.black),
                         fontSize = 17.sp,
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                            Font(R.font.karla_regular)
                         )
                     ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Done
                     ),
                     isError = phoneNumberError,
                     colors = OutlinedTextFieldDefaults.colors(
-                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
-                        focusedBorderColor = colorResource(id = R.color.color_07011c),
+                        cursorColor = colorResource(id = R.color.color_926C57), // Set cursor color here
+                        focusedBorderColor = colorResource(id = R.color.color_926C57),
                     )
                 )
                 if (incorrectphoneNumberError) {
@@ -409,26 +427,16 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                         text = stringResource(id = R.string.invalid_phone_nuber),
                         color = MaterialTheme.colorScheme.error,
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                            Font(R.font.karla_regular)
                         )
                     )
                 }
-//                if (phoneNumberError) {
-//                    Text(
-//                        text = stringResource(id = R.string.phone_number_is_required),
-//                        color = MaterialTheme.colorScheme.error,
-//                        fontFamily = FontFamily(
-//                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-//                        )
-//                    )
-//                }
-
-
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)
+                        .align(Alignment.CenterHorizontally)
                 ) {
                     Button(
                         onClick = {
@@ -436,7 +444,6 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                             // Validate inputs
                             nameError = name.isBlank()
                             addressError = address.isBlank()
-//                            phoneNumberError = phoneNumber.isBlank()
 
                             phoneNumberError = phoneNumber.isBlank()
                             incorrectphoneNumberError=!phoneNumber.matches(Regex("^[0-9]{10}$"))
@@ -457,7 +464,7 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.color_07011c), // Custom background color
+                            containerColor = colorResource(id = R.color.color_926C57), // Custom background color
                             contentColor = colorResource(id = R.color.white) // Custom text/icon color
                         )
                     ) {
@@ -467,15 +474,12 @@ fun AddEditTenantScreen(onSave: () -> Unit, tenantsViewModel: TenantsViewModel) 
                                 .padding(5.dp), textAlign = TextAlign.Center,
                             style = TextStyle(
                                 fontFamily = FontFamily(
-                                    Font(R.font.crimsonpro_semibold, FontWeight.Normal)
+                                    Font(R.font.karla_semi_bold)
                                 ),
-                                fontSize = 28.sp,
+                                fontSize = 20.sp,
                             )
                         )
                     }
                 }
             }
-
-        }
-    }
 }

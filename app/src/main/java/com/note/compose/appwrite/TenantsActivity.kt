@@ -20,21 +20,22 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,16 +59,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -150,7 +150,7 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = colorResource(id = R.color.color_07011c),
+                    containerColor = colorResource(id = R.color.color_926C57),
                     titleContentColor = colorResource(id = R.color.white),
                 ),
                 title = {
@@ -178,9 +178,9 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                         },
                         style = TextStyle(
                             fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_semibold, FontWeight.Normal)
+                                Font(R.font.karla_bold)
                             ),
-                            fontSize = 30.sp,
+                            fontSize = 23.sp,
                         ),
                     )
                 },
@@ -232,7 +232,11 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                         .offset(y = 50.dp),
                     elevation = FloatingActionButtonDefaults.elevation(6.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_plus),
+                        modifier = Modifier.size(20.dp), // Adjust the icon size
+                        tint = colorResource(id = R.color.black),
+                        contentDescription = "Add")
                 }
             }
         },
@@ -262,12 +266,22 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                         icon = {
                             Icon(
                                 Icons.Default.Home,
-                                contentDescription = "Property"
+                                contentDescription = "Property",
+                                tint = if(selectedTab.value=="Property"){
+
+                                    colorResource(id = R.color.black)}else{
+                                    colorResource(id = R.color.gray_400)}
                             )
                         },
-                        label = { Text("Property") },
-                        selectedContentColor = colorResource(id = R.color.color_07011c), // Custom selected color
-                        unselectedContentColor = colorResource(id = R.color.gray_600), // Custom unselected color
+                        label = { Text("Property", style = TextStyle(
+                            fontFamily = FontFamily(
+                                Font(R.font.karla_medium)
+                            ),
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center
+                        ), color = if(selectedTab.value=="Property"){
+                            colorResource(id = R.color.black)}else{
+                            colorResource(id = R.color.gray_400)}) },
                         alwaysShowLabel = true
                     )
                     BottomNavigationItem(
@@ -281,19 +295,30 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                         icon = {
                             Icon(
                                 Icons.Default.Person,
-                                contentDescription = "Tenants"
+                                contentDescription = "Tenants",
+                                tint = if(selectedTab.value=="Tenants"){
+                                    colorResource(id = R.color.black)}else{
+                                    colorResource(id = R.color.gray_400)}
                             )
                         },
-                        label = { Text("Tenants") },
-                        selectedContentColor = colorResource(id = R.color.color_07011c), // Custom selected color
-                        unselectedContentColor = colorResource(id = R.color.gray_600), // Custom unselected color
+                        label = { Text("Tenants", style = TextStyle(
+                            fontFamily = FontFamily(
+                                Font(R.font.karla_semi_bold)
+                            ),
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center
+                        ), color = if(selectedTab.value=="Tenants"){
+                            colorResource(id = R.color.black)}else{
+                            colorResource(id = R.color.gray_400)}) },
                         alwaysShowLabel = true
                     )
                 }
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .background(colorResource(id = R.color.white))) {
             NavHost(
                 navController = navController,
                 startDestination = "property_list"
@@ -366,6 +391,7 @@ fun PropertyListScreen(
 
     var items by remember { mutableStateOf<List<RentalData>>(emptyList()) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showProgressIndicator by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<String?>(null) }
     val view = LocalView.current
     val window = (view.context as Activity).window
@@ -379,25 +405,28 @@ fun PropertyListScreen(
 
     when (state) {
         is ResultState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize() // Take full screen space
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center), // Center the indicator
-                    color = MaterialTheme.colorScheme.primary, // Use theme color or custom color
-                    strokeWidth = 4.dp // Optional: Adjust stroke width
-                )
-            }
+            showProgressIndicator=true
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize() // Take full screen space
+//            ) {
+//                CircularProgressIndicator(
+//                    modifier = Modifier.align(Alignment.Center), // Center the indicator
+//                    color = MaterialTheme.colorScheme.primary, // Use theme color or custom color
+//                    strokeWidth = 4.dp // Optional: Adjust stroke width
+//                )
+//            }
         }
 
         is ResultState.Success -> {
             items = (state as ResultState.Success<List<RentalData>>).data
+            showProgressIndicator=false
 
         }
 
         is ResultState.Error -> {
             val error = (state as ResultState.Error).message
+            showProgressIndicator=false
             Toast.makeText(LocalContext.current, error, Toast.LENGTH_SHORT).show()
         }
     }
@@ -406,6 +435,7 @@ fun PropertyListScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(5.dp)
+            .background(color = colorResource(id = R.color.white))
     ) {
         if (items.isNullOrEmpty()) {
             Box(
@@ -415,9 +445,9 @@ fun PropertyListScreen(
                     "No Property Yet!",
                     style = TextStyle(
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_semibold, FontWeight.Normal)
+                            Font(R.font.karla_medium)
                         ),
-                        fontSize = 28.sp,
+                        fontSize = 25.sp,
                         textAlign = TextAlign.Center
                     ),
                     textAlign = TextAlign.Center,
@@ -427,12 +457,13 @@ fun PropertyListScreen(
                 )
             }
         } else {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), // Define 2 columns in the grid
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(10.dp)
             ) {
-                items(items) { item ->
+                itemsIndexed(items) { index, item ->
                     RentItemRow(
                         item,
                         onEdit = { onEditItem(item) },
@@ -443,6 +474,13 @@ fun PropertyListScreen(
                     )
                 }
             }
+        }
+        if(showProgressIndicator) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center), // Center the indicator
+                    color = colorResource(id = R.color.color_926C57), // Use theme color or custom color
+                    strokeWidth = 4.dp // Optional: Adjust stroke width
+                )
         }
 
         if (showDeleteDialog) {
@@ -475,269 +513,251 @@ fun AddEditPropertyScreen(onSave: () -> Unit, viewModel: MainViewModel) {
     var rentAmountError by remember { mutableStateOf(false) }
     var advanceAmountError by remember { mutableStateOf(false) }
     var advanceAmountOverError by remember { mutableStateOf(false) }
-    Scaffold(
 
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = {
+                name = it
+                nameError = false // Reset error when user starts typing
+            },
+            label = {
+                Text(
+                    stringResource(id = R.string.name),
+                    color = colorResource(id = R.color.color_979797),
+                    fontFamily = FontFamily(
+                        Font(R.font.karla_regular)
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                color = colorResource(id = R.color.black),
+                fontSize = 17.sp,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            isError = nameError,
+            colors = OutlinedTextFieldDefaults.colors(
+                cursorColor = colorResource(id = R.color.black), // Set cursor color here
+                focusedBorderColor = colorResource(id = R.color.black),
+            )
+
+        )
+        if (nameError) {
+            Text(
+                text = stringResource(id = R.string.name_is_required),
+                color = MaterialTheme.colorScheme.error,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            )
+        }
+
+        OutlinedTextField(
+            value = address,
+            onValueChange = {
+                address = it
+                addressError = false
+            },
+            label = {
+                Text(
+                    stringResource(id = R.string.address),
+                    color = colorResource(id = R.color.color_979797),
+                    fontFamily = FontFamily(
+                        Font(R.font.karla_regular)
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                color = colorResource(id = R.color.black),
+                fontSize = 17.sp,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            isError = addressError,
+            colors = OutlinedTextFieldDefaults.colors(
+                cursorColor = colorResource(id = R.color.black), // Set cursor color here
+                focusedBorderColor = colorResource(id = R.color.black),
+            )
+        )
+        if (addressError) {
+            Text(
+                text = stringResource(id = R.string.address_is_required),
+                color = MaterialTheme.colorScheme.error,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            )
+        }
+
+        OutlinedTextField(
+            value = rentAmount,
+            onValueChange = {
+                rentAmount = it
+                rentAmountError = false
+            },
+            label = {
+                Text(
+                    stringResource(id = R.string.rent_amount),
+                    color = colorResource(id = R.color.color_979797),
+                    fontFamily = FontFamily(
+                        Font(R.font.karla_regular)
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                color = colorResource(id = R.color.black),
+                fontSize = 17.sp,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            isError = rentAmountError,
+            colors = OutlinedTextFieldDefaults.colors(
+                cursorColor = colorResource(id = R.color.black), // Set cursor color here
+                focusedBorderColor = colorResource(id = R.color.black),
+            )
+        )
+        if (rentAmountError) {
+            Text(
+                text = stringResource(id = R.string.rent_amount_is_required),
+                color = MaterialTheme.colorScheme.error,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            )
+        }
+
+        OutlinedTextField(
+            value = advanceAmount,
+            onValueChange = {
+                val rentValue = rentAmount.toIntOrNull() ?: 0
+                val advanceValue = it.toIntOrNull() ?: 0
+
+                if (advanceValue <= rentValue) {
+                    advanceAmount = it
+                    advanceAmountOverError = false
+                } else {
+                    advanceAmountOverError = true
+                }
+            },
+            label = {
+                Text(
+                    stringResource(id = R.string.advance_amount),
+                    color = colorResource(id = R.color.color_979797),
+                    fontFamily = FontFamily(
+                        Font(R.font.karla_regular)
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                color = colorResource(id = R.color.black),
+                fontSize = 17.sp,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            isError = advanceAmountError,
+            colors = OutlinedTextFieldDefaults.colors(
+                cursorColor = colorResource(id = R.color.black),
+                focusedBorderColor = colorResource(id = R.color.black),
+            )
+        )
+        if (advanceAmountOverError) {
+            Text(
+                text = stringResource(id = R.string.advance_amount_cannot_exceed_rent_amount),
+                color = MaterialTheme.colorScheme.error,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            )
+        }
+
+        if (advanceAmountError) {
+            Text(
+                text = stringResource(id = R.string.advance_amount_is_required),
+                color = MaterialTheme.colorScheme.error,
+                fontFamily = FontFamily(
+                    Font(R.font.karla_regular)
+                )
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxWidth()
+                .padding(10.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Button(
+                onClick = {
+                    // Save the item (add or edit)
+                    // Validate inputs
+                    nameError = name.isBlank()
+                    addressError = address.isBlank()
+                    rentAmountError = rentAmount.isBlank()
+                    advanceAmountError = advanceAmount.isBlank()
 
-                val rainbowColors: List<Color> = listOf(
-                    colorResource(id = R.color.color_D81B60), colorResource(
-                        id = R.color.color_5E35B1
-                    ), colorResource(id = R.color.color_00ACC1)
-                )
-                val brush = remember {
-                    Brush.linearGradient(
-                        colors = rainbowColors
-                    )
-                }
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it
-                        nameError = false // Reset error when user starts typing
-                    },
-                    label = {
-                        Text(
-                            stringResource(id = R.string.name),
-                            color = colorResource(id = R.color.color_979797),
-                            fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    // If no errors, save the data
+                    if (!nameError && !addressError && !rentAmountError && !advanceAmountError) {
+
+                        viewModel.saveItem(
+                            RentalData(
+                                id = currentItem?.id ?: "",
+                                name = name,
+                                address = address,
+                                rentAmount = rentAmount.toIntOrNull() ?: 0,
+                                advanceAmount = advanceAmount.toIntOrNull() ?: 0
                             )
                         )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        color = colorResource(id = R.color.black),
-                        fontSize = 17.sp,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    ),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    isError = nameError,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
-                        focusedBorderColor = colorResource(id = R.color.color_07011c),
-                    )
-
-                )
-                if (nameError) {
-                    Text(
-                        text = stringResource(id = R.string.name_is_required),
-                        color = MaterialTheme.colorScheme.error,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    )
-                }
-
-                OutlinedTextField(
-                    value = address,
-                    onValueChange = {
-                        address = it
-                        addressError = false
-                    },
-                    label = {
-                        Text(
-                            stringResource(id = R.string.address),
-                            color = colorResource(id = R.color.color_979797),
-                            fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                            )
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        color = colorResource(id = R.color.black),
-                        fontSize = 17.sp,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    isError = addressError,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
-                        focusedBorderColor = colorResource(id = R.color.color_07011c),
-                    )
-                )
-                if (addressError) {
-                    Text(
-                        text = stringResource(id = R.string.address_is_required),
-                        color = MaterialTheme.colorScheme.error,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    )
-                }
-
-                OutlinedTextField(
-                    value = rentAmount,
-                    onValueChange = {
-                        rentAmount = it
-                        rentAmountError = false
-                    },
-                    label = {
-                        Text(
-                            stringResource(id = R.string.rent_amount),
-                            color = colorResource(id = R.color.color_979797),
-                            fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                            )
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        color = colorResource(id = R.color.black),
-                        fontSize = 17.sp,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    ),
-                    isError = rentAmountError,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        cursorColor = colorResource(id = R.color.color_07011c), // Set cursor color here
-                        focusedBorderColor = colorResource(id = R.color.color_07011c),
-                    )
-                )
-                if (rentAmountError) {
-                    Text(
-                        text = stringResource(id = R.string.rent_amount_is_required),
-                        color = MaterialTheme.colorScheme.error,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    )
-                }
-
-                OutlinedTextField(
-                    value = advanceAmount,
-                    onValueChange = {
-                        val rentValue = rentAmount.toIntOrNull() ?: 0
-                        val advanceValue = it.toIntOrNull() ?: 0
-
-                        if (advanceValue <= rentValue) {
-                            advanceAmount = it
-                            advanceAmountOverError = false
-                        } else {
-                            advanceAmountOverError = true
-                        }
-                    },
-                    label = {
-                        Text(
-                            stringResource(id = R.string.advance_amount),
-                            color = colorResource(id = R.color.color_979797),
-                            fontFamily = FontFamily(
-                                Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                            )
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        color = colorResource(id = R.color.black),
-                        fontSize = 17.sp,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    isError = advanceAmountError,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        cursorColor = colorResource(id = R.color.color_07011c),
-                        focusedBorderColor = colorResource(id = R.color.color_07011c),
-                    )
-                )
-                if (advanceAmountOverError) {
-                    Text(
-                        text = stringResource(id = R.string.advance_amount_cannot_exceed_rent_amount),
-                        color = MaterialTheme.colorScheme.error,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    )
-                }
-
-                if (advanceAmountError) {
-                    Text(
-                        text = stringResource(id = R.string.advance_amount_is_required),
-                        color = MaterialTheme.colorScheme.error,
-                        fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_regular, FontWeight.Normal)
-                        )
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            // Save the item (add or edit)
-                            // Validate inputs
-                            nameError = name.isBlank()
-                            addressError = address.isBlank()
-                            rentAmountError = rentAmount.isBlank()
-                            advanceAmountError = advanceAmount.isBlank()
-
-                            // If no errors, save the data
-                            if (!nameError && !addressError && !rentAmountError && !advanceAmountError) {
-
-                                viewModel.saveItem(
-                                    RentalData(
-                                        id = currentItem?.id ?: "",
-                                        name = name,
-                                        address = address,
-                                        rentAmount = rentAmount.toIntOrNull() ?: 0,
-                                        advanceAmount = advanceAmount.toIntOrNull() ?: 0
-                                    )
-                                )
-                                onSave()
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.color_07011c), // Custom background color
-                            contentColor = colorResource(id = R.color.white) // Custom text/icon color
-                        )
-                    ) {
-                        Text(
-                            stringResource(id = R.string.save), modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp), textAlign = TextAlign.Center,
-                            style = TextStyle(
-                                fontFamily = FontFamily(
-                                    Font(R.font.crimsonpro_semibold, FontWeight.Normal)
-                                ),
-                                fontSize = 28.sp,
-                            )
-                        )
+                        onSave()
                     }
-                }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(id = R.color.color_926C57), // Custom background color
+                    contentColor = colorResource(id = R.color.white) // Custom text/icon color
+                )
+            ) {
+                Text(
+                    stringResource(id = R.string.save), modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp), textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontFamily = FontFamily(
+                            Font(R.font.karla_semi_bold)
+                        ),
+                        fontSize = 20.sp,
+                    )
+                )
             }
-
         }
     }
+
+
+
 }
 
 @Composable
@@ -753,36 +773,61 @@ fun TenantOptionsMenu(
 //            .background(color = Color(0x80000000)) // Transparent black background to dim the content
             .clickable { onClose() }, // Close menu when clicking outside
         contentAlignment = Alignment.BottomCenter
+
     ) {
         Card(
             modifier = Modifier
                 .wrapContentSize()
-                .padding(26.dp),
+                .padding(26.dp)
+                .background(colorResource(id = R.color.white)),
+            shape = RoundedCornerShape(8.dp),
+            elevation = CardDefaults.cardElevation(10.dp)
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .padding(6.dp)
+                    .background(color = colorResource(id = R.color.color_E6D7C3))
+
             ) {
-                Text(
-                    text = "Add Tenant",
+                Column(
                     modifier = Modifier
-                        .wrapContentSize()
-                        .padding(8.dp)
-                        .clickable {
-                            // Action for "Add Tenant"
-                            onAddTenant()
-                        }
-                )
-                Text(
-                    text = "Allocate Tenant",
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(8.dp)
-                        .clickable {
-                            // Action for "Allocate Tenant"
-                            onAllocateTenant()
-                        }
-                )
+                        .padding(6.dp)
+                ) {
+                    Text(
+                        text = "Add Tenant",
+                        style = TextStyle(
+                            fontFamily = FontFamily(
+                                Font(R.font.karla_medium)
+                            ),
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(8.dp)
+                            .clickable {
+                                // Action for "Add Tenant"
+                                onAddTenant()
+                            },
+
+                        )
+                    Text(
+                        text = "Allocate Tenant",
+                        style = TextStyle(
+                            fontFamily = FontFamily(
+                                Font(R.font.karla_medium)
+                            ),
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(8.dp)
+                            .clickable {
+                                // Action for "Allocate Tenant"
+                                onAllocateTenant()
+                            }
+                    )
+                }
             }
         }
     }

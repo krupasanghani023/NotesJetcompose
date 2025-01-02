@@ -25,7 +25,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material.TextFieldDefaults
@@ -45,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,7 +84,7 @@ fun AddEditAllocationScreen(
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = colorResource(id = R.color.color_926C57),
                     strokeWidth = 4.dp
                 )
             }
@@ -94,6 +92,7 @@ fun AddEditAllocationScreen(
 
         is ResultState.Success -> {
             items = (propertystate as ResultState.Success<List<RentalData>>).data
+            items=items.filter { !it.isAllocated }
             propertys =
                 items.map { it.name }
         }
@@ -111,7 +110,7 @@ fun AddEditAllocationScreen(
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = colorResource(id = R.color.color_926C57),
                     strokeWidth = 4.dp
                 )
             }
@@ -200,7 +199,7 @@ fun AddEditAllocationScreen(
                 onValueChange = {},
                 label = { Text(text = "Allocated Tenant", color = colorResource(id = R.color.color_979797),
                     fontFamily = FontFamily(
-                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        Font(R.font.karla_regular)
                     )) },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -208,7 +207,7 @@ fun AddEditAllocationScreen(
                     color = colorResource(id = R.color.black),
                     fontSize = 17.sp,
                     fontFamily = FontFamily(
-                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        Font(R.font.karla_regular)
                     )
                 ),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -227,7 +226,7 @@ fun AddEditAllocationScreen(
                 Text(
                     "Rent", color = colorResource(id = R.color.color_979797),
                     fontFamily = FontFamily(
-                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        Font(R.font.karla_regular)
                     )
                 )
             },
@@ -241,7 +240,7 @@ fun AddEditAllocationScreen(
                 Text(
                     "Advance", color = colorResource(id = R.color.color_979797),
                     fontFamily = FontFamily(
-                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        Font(R.font.karla_regular)
                     )
                 )
             },
@@ -256,7 +255,7 @@ fun AddEditAllocationScreen(
                 onValueChange = {},
                 label = { Text(text = "Status", color = colorResource(id = R.color.color_979797),
                     fontFamily = FontFamily(
-                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        Font(R.font.karla_regular)
                     )) },
                 trailingIcon = {
                     Checkbox(
@@ -274,7 +273,7 @@ fun AddEditAllocationScreen(
                     color = colorResource(id = R.color.black),
                     fontSize = 17.sp,
                     fontFamily = FontFamily(
-                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        Font(R.font.karla_regular)
                     )
                 ),
                 // Customizing the border color directly
@@ -399,7 +398,7 @@ fun AddEditAllocationScreen(
 //                        onSave()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.color_07011c), // Custom background color
+                    containerColor = colorResource(id = R.color.color_926C57), // Custom background color
                     contentColor = colorResource(id = R.color.white) // Custom text/icon color
                 ),
 
@@ -410,9 +409,9 @@ fun AddEditAllocationScreen(
                         .padding(5.dp), textAlign = TextAlign.Center,
                     style = TextStyle(
                         fontFamily = FontFamily(
-                            Font(R.font.crimsonpro_semibold, FontWeight.Normal)
+                            Font(R.font.karla_semi_bold)
                         ),
-                        fontSize = 28.sp,
+                        fontSize = 20.sp,
                     )
                 )
             }
@@ -463,7 +462,7 @@ fun DatePickerWithInput(
             Text(
                 text = label, color = colorResource(id = R.color.color_979797),
                 fontFamily = FontFamily(
-                    Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    Font(R.font.karla_regular)
                 )
             )
         },
@@ -471,7 +470,7 @@ fun DatePickerWithInput(
             color = colorResource(id = R.color.black),
             fontSize = 17.sp,
             fontFamily = FontFamily(
-                Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                Font(R.font.karla_regular)
             )
         ),
         trailingIcon = {
@@ -512,7 +511,7 @@ fun DropdownMenuField(
                     label,
                     color = colorResource(id = R.color.color_979797),
                     fontFamily = FontFamily(
-                        Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                        Font(R.font.karla_regular)
                     )
                 )
             },
@@ -520,7 +519,7 @@ fun DropdownMenuField(
                 color = colorResource(id = R.color.black),
                 fontSize = 17.sp,
                 fontFamily = FontFamily(
-                    Font(R.font.crimsonpro_regular, FontWeight.Normal)
+                    Font(R.font.karla_regular)
                 )
             ),
             readOnly = true,
