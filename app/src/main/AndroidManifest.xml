@@ -24,10 +24,8 @@
         android:theme="@style/Base.Theme.Compose"
         tools:targetApi="31">
         <activity
-            android:name=".appwrite.TenantsActivity"
-            android:exported="true"
-            android:label="@string/title_activity_tenants"
-            android:theme="@style/Base.Theme.Compose" >
+            android:name=".APICall1.HomeActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,11 +33,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".appwrite.AppwriteDemoActivity"
-            android:exported="false"
-            android:label="@string/title_activity_appwrite_demo"
+            android:name=".appwrite.TenantsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_tenants"
             android:theme="@style/Base.Theme.Compose">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ImageListActivity"

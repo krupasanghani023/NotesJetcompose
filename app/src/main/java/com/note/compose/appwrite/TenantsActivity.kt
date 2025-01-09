@@ -269,7 +269,7 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                                 contentDescription = "Property",
                                 tint = if(selectedTab.value=="Property"){
 
-                                    colorResource(id = R.color.black)}else{
+                                    colorResource(id = R.color.color_926C57)}else{
                                     colorResource(id = R.color.gray_400)}
                             )
                         },
@@ -280,7 +280,7 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center
                         ), color = if(selectedTab.value=="Property"){
-                            colorResource(id = R.color.black)}else{
+                            colorResource(id = R.color.color_926C57)}else{
                             colorResource(id = R.color.gray_400)}) },
                         alwaysShowLabel = true
                     )
@@ -297,7 +297,7 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                                 Icons.Default.Person,
                                 contentDescription = "Tenants",
                                 tint = if(selectedTab.value=="Tenants"){
-                                    colorResource(id = R.color.black)}else{
+                                    colorResource(id = R.color.color_926C57)}else{
                                     colorResource(id = R.color.gray_400)}
                             )
                         },
@@ -308,7 +308,7 @@ fun MainScreen(propertyViewModel: MainViewModel, tenantsViewModel: TenantsViewMo
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center
                         ), color = if(selectedTab.value=="Tenants"){
-                            colorResource(id = R.color.black)}else{
+                            colorResource(id = R.color.color_926C57)}else{
                             colorResource(id = R.color.gray_400)}) },
                         alwaysShowLabel = true
                     )
@@ -406,16 +406,6 @@ fun PropertyListScreen(
     when (state) {
         is ResultState.Loading -> {
             showProgressIndicator=true
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize() // Take full screen space
-//            ) {
-//                CircularProgressIndicator(
-//                    modifier = Modifier.align(Alignment.Center), // Center the indicator
-//                    color = MaterialTheme.colorScheme.primary, // Use theme color or custom color
-//                    strokeWidth = 4.dp // Optional: Adjust stroke width
-//                )
-//            }
         }
 
         is ResultState.Success -> {
