@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "todo_database")
 data class TodoLocalData(
     val userId: Int,
-    val id: Int,
+    @PrimaryKey val id: Int,
     val title: String,
     val completed: Boolean
 )

@@ -34,7 +34,7 @@ class TodoAdapter(private var todos: List<TodoLocalData>) : RecyclerView.Adapter
         fun bind(todo: TodoLocalData) {
             // Set the values for each view manually
             todoTitle.text = todo.title
-            todoStatus.isChecked = todo.isCompleted
+            todoStatus.isChecked = todo.completed
         }
     }
 

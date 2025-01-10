@@ -6,22 +6,45 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".APICall1.HomeActivity">
-    <FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <com.google.android.material.appbar.AppBarLayout
+            android:backgroundTint="@color/purple_500"
+            android:id="@+id/appHeader"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="45dp">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:text="TodoList"
+                android:textSize="20sp"
+                android:textColor="@color/white"/>
+        </com.google.android.material.appbar.AppBarLayout>
+        <FrameLayout
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/appHeader"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-    </FrameLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
+    </RelativeLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

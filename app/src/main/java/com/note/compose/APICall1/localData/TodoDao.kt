@@ -2,11 +2,12 @@ package com.note.compose.APICall1.localData
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
 interface TodoDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(todos: List<TodoLocalData>)
 
     @Query("SELECT * FROM todo_database")

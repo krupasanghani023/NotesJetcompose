@@ -17,17 +17,20 @@ import com.note.compose.APICall1.adapter.TodoAdapter
 import com.note.compose.APICall1.utils.Result
 import com.note.compose.APICall1.viewModel.TodoViewModel
 import com.note.compose.R
+import com.note.compose.databinding.ActivityHomeBinding
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var viewModel: TodoViewModel
 
     private lateinit var todoAdapter: TodoAdapter
+    private lateinit var binding:ActivityHomeBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_home)
+//        enableEdgeToEdge()
+        binding=ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -35,27 +38,24 @@ class HomeActivity : AppCompatActivity() {
             insets
         }
 
-
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        val progressBar: ProgressBar = findViewById(R.id.progressBar)
-
-//        viewModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))[TodoViewModel::class.java]
         viewModel = ViewModelProvider(this).get(TodoViewModel::class.java)
 
         todoAdapter = TodoAdapter(listOf())
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = todoAdapter
-        progressBar.visibility=View.GONE
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = todoAdapter
+        binding.progressBar.visibility=View.VISIBLE
         viewModel.todos.observe(this) { todos ->
            Log.d("MyTesting","APiCall Success....")
+            todoAdapter.updateData(todos)
+            binding.progressBar.visibility=View.GONE
         }
 
         viewModel.error.observe(this) { error ->
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+            Log.d("MyTesting","Error:--${error.toString()}")
+            binding.progressBar.visibility=View.GONE
         }
-        viewModel.localTodos.observe(this){localTodos->
-            todoAdapter.updateData(localTodos)
-        }
+
 
         viewModel.performApiCallIfNeeded()
     }
